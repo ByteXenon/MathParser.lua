@@ -1,8 +1,12 @@
 --[[
   Name: Evaluator.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-01-10
+  Date: 2024-01-11
 --]]
+
+--* Imports *--
+local unpack = (unpack or table.unpack)
+local insert = table.insert
 
 --* Constants *--
 local DEFAULT_OPERATOR_FUNCTIONS = {
@@ -17,6 +21,17 @@ local DEFAULT_OPERATOR_FUNCTIONS = {
     ["^"] = function(leftValue, rightValue) return leftValue ^ rightValue end,
     ["%"] = function(leftValue, rightValue) return leftValue % rightValue end
   }
+}
+
+local DEFAULT_FUNCTIONS = {
+  sin   = math.sin,   cos   = math.cos,
+  tan   = math.tan,   asin  = math.asin,
+  acos  = math.acos,  atan  = math.atan,
+  floor = math.floor, ceil  = math.ceil,
+  abs   = math.abs,   sqrt  = math.sqrt,
+  log   = math.log,   log10 = math.log10,
+  exp   = math.exp,   rad   = math.rad,
+  deg   = math.deg
 }
 
 --* EvaluatorMethods *--
@@ -64,6 +79,25 @@ function EvaluatorMethods:evaluateOperator(node)
   return self:evaluateBinaryOperator(node)
 end
 
+--- Evaluates a function call node.
+-- @param <Table> node The node to evaluate.
+-- @return <Number> result The result of the evaluation.
+function EvaluatorMethods:evaluateFunctionCall(node)
+  local functionName = node.FunctionName
+  local arguments = node.Arguments
+
+  local functionCall = self.functions[functionName] or DEFAULT_FUNCTIONS[functionName]
+  assert(functionCall, "invalid function call: " .. tostring(functionName))
+
+  local evaluatedArguments = {}
+  for _, argument in ipairs(arguments) do
+    local evaluatedArgument = self:evaluateNode(argument)
+    insert(evaluatedArguments, evaluatedArgument)
+  end
+
+  return functionCall(unpack(evaluatedArguments))
+end
+
 --- Evaluates the given node.
 -- @param <Table> node The node to evaluate.
 -- @return <Number> result The result of the evaluation.
@@ -79,6 +113,8 @@ function EvaluatorMethods:evaluateNode(node)
     return self.variables[node.Value]
   elseif nodeType == "Operator" or nodeType == "UnaryOperator" then
     return self:evaluateOperator(node)
+  elseif nodeType == "FunctionCall" then
+    return self:evaluateFunctionCall(node)
   end
 
   return error("Invalid node type: " .. tostring(nodeType))
@@ -90,12 +126,13 @@ end
 -- @param <Table> expression The expression to evaluate.
 -- @param <Table?> variables={} The variables to use in the evaluator.
 -- @param <Table?> operatorFunctions=DEFAULT_OPERATOR_FUNCTIONS The operator functions to evaluate in the evaluator.
-function EvaluatorMethods:resetToInitialState(expression, variables, operatorFunctions)
+function EvaluatorMethods:resetToInitialState(expression, variables, operatorFunctions, functions)
   assert(expression, "No expression given")
 
   self.expression = expression
   self.variables = variables or {}
   self.operatorFunctions = operatorFunctions or DEFAULT_OPERATOR_FUNCTIONS
+  self.functions = functions or DEFAULT_FUNCTIONS
 end
 
 --- Evaluates the given expression.
@@ -114,11 +151,12 @@ local Evaluator = {}
 -- @param <Table?> variables={} The variables to use in the evaluator.
 -- @param <Table?> operatorFunctions=DEFAULT_OPERATOR_FUNCTIONS The operator functions to evaluate in the evaluator.
 -- @return <Table> EvaluatorInstance The Evaluator instance.
-function Evaluator:new(expression, variables, operatorFunctions)
+function Evaluator:new(expression, variables, operatorFunctions, functions)
   local EvaluatorInstance = {}
   EvaluatorInstance.expression = expression
   EvaluatorInstance.variables = variables or {}
   EvaluatorInstance.operatorFunctions = operatorFunctions or DEFAULT_OPERATOR_FUNCTIONS
+  EvaluatorInstance.functions = functions or {}
 
   local function inheritModule(moduleName, moduleTable)
     for index, value in pairs(moduleTable) do
