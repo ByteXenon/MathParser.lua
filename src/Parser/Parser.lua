@@ -1,8 +1,18 @@
 --[[
   Name: Parser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-01-10
+  Date: 2024-01-11
 --]]
+
+--* Dependencies *--
+local NodeFactory = require("Parser/NodeFactory")
+
+--* Imports *--
+local insert = table.insert
+
+local createUnaryOperatorNode = NodeFactory.createUnaryOperatorNode
+local createOperatorNode = NodeFactory.createOperatorNode
+local createFunctionCallNode = NodeFactory.createFunctionCallNode
 
 --* Constants *--
 local DEFAULT_OPERATOR_PRECEDENCES = {
@@ -22,14 +32,6 @@ local DEFAULT_OPERATOR_PRECEDENCES = {
     ["^"] = true
   }
 }
-
---* Local Functions *--
-local function createUnaryOperatorNode(operator, operand)
-  return { TYPE = "UnaryOperator", Value = operator, Operand = operand }
-end
-local function createOperatorNode(operator, left, right)
-  return { TYPE = "Operator", Value = operator, Left = left, Right = right }
-end
 
 --* ParserMethods *--
 local ParserMethods = {}
@@ -79,11 +81,47 @@ function ParserMethods:isRightAssociativeBinaryOperator(token)
   return token and token.TYPE == "Operator" and self.operatorPrecedences.RightAssociativeBinaryOperators[token.Value]
 end
 
+--- Checks if the current token is a function call
+-- @return <Boolean> isFunctionCall Whether the current token is a function call.
+function ParserMethods:isFunctionCall()
+  local currentToken = self.currentToken
+  local nextToken = self:peek()
+  if not nextToken then return end
+  return currentToken.TYPE == "Variable" and nextToken.TYPE == "Parentheses" and nextToken.Value == "("
+end
+
 --- Gets the precedence of the given token.
 -- @param <Table> token The token to get the precedence of.
 -- @return <Number> precedence The precedence of the token.
 function ParserMethods:getPrecedence(token)
   return token and self.operatorPrecedences.Binary[token.Value]
+end
+
+--- Parses the function call.
+-- @return <Table> expression The AST of the function call.
+function ParserMethods:parseFunctionCall()
+  -- <function call> ::= <variable> "(" <expression> ["," <expression>]* ")"
+  local functionName = self.currentToken.Value
+  self:consume() -- Consume the variable
+  self:consume() -- Consume the opening parenthesis
+  local arguments = {}
+  while true do
+    local argument = self:parseExpression()
+    insert(arguments, argument)
+
+    local currentToken = self.currentToken
+    if not currentToken then
+      error("Expected ')', got EOF")
+    elseif currentToken.Value == ")" then
+      break
+    elseif currentToken.TYPE == "Comma" then
+      self:consume() -- Consume the comma
+    else -- Unexpected token
+      error("Expected ',' or ')', got '" .. currentToken.Value .. "'")
+    end
+  end
+  self:consume()
+  return createFunctionCallNode(functionName, arguments)
 end
 
 --- Parses the binary operator.
@@ -128,7 +166,7 @@ end
 --- Parses the primary expression.
 -- @return <Table> expression The AST of the primary expression.
 function ParserMethods:parsePrimaryExpression()
-  -- <primary> ::= <constant> | <variable> | "(" <expression> ")"
+  -- <primary> ::= <constant> | <variable> | <function call> | "(" <expression> ")"
   local token = self.currentToken
   if not token then return end
 
@@ -142,7 +180,16 @@ function ParserMethods:parsePrimaryExpression()
     end
     self:consume() -- Consume the closing parenthesis
     return expression
-  elseif TYPE == "Constant" or TYPE == "Variable" then
+  elseif TYPE == "Variable" then
+    -- Check if it's a function call first
+    if self:isFunctionCall() then
+      return self:parseFunctionCall()
+    end
+
+    -- It's a variable
+    self:consume()
+    return token
+  elseif TYPE == "Constant" then
     self:consume()
     return token
   end
@@ -174,12 +221,12 @@ end
 
 --- Parses the given tokens, and returns the AST.
 -- @return <Table> expression The AST of the tokens.
-function ParserMethods:parse()
+function ParserMethods:parse(noErrors)
   assert(self.tokens, "No tokens to parse")
 
   local expression = self:parseExpression()
   local remainingToken = self.currentToken
-  if remainingToken then
+  if remainingToken and not noErrors then
     error("Invalid expression: unexpected token '" .. remainingToken.Value .. "'")
   end
 
