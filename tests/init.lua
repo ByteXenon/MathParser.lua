@@ -38,8 +38,7 @@ runUnitTest(".5 + .5", 1, "Floating point numbers (leading decimal point)")
 runUnitTest("2e3 + 2e+3", 4000, "Scientific notation (positive exponent)")
 runUnitTest("2e3 - 2e-3", 1999.998, "Scientific notation (negative exponent)")
 runUnitTest(".5e3 + .5e-3", 500.0005, "Scientific notation (leading decimal point)")
--- TO BE REMOVED
-runUnitTest("1 + 1", 3, "This should fail")
+
 
 -- Error handling tests
 local function runErrorHandlingTest(expression, testName)
