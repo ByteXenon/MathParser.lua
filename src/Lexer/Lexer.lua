@@ -61,11 +61,12 @@ function LexerMethods:isParenthesis(char)
   return char == "(" or char == ")"
 end
 
---- Checks if the given character is a digit.
+--- Checks if the given character is a number.
 -- @param <String?> char=self.curChar The character to check.
--- @return <Boolean> isDigit Whether the character is a digit.
-function LexerMethods:isDigit(char)
-  return (char or self.curChar):match("%d")
+-- @return <Boolean> isNumber Whether the character is a number.
+function LexerMethods:isNumber(char)
+  local char = (char or self.curChar)
+  return char:match("[%d]") or (char == "." and self:peek():match("[%d]"))
 end
 
 --- Checks if the given character is an identifier.
@@ -85,13 +86,42 @@ end
 --- Consumes the next number from the character stream.
 -- @return <String> number The next number.
 function LexerMethods:consumeNumber()
-  local number = {}
-  local nextChar
-  repeat
-    insert(number, self.curChar)
-    nextChar = self:peek()
-  until not (nextChar:match("%d") and self:consume())
-  -- Use table.concat instead of the .. operator, because it's faster.
+  local number = {self.curChar}
+  local isFloat = false
+  local isScientific = false
+  local isHex = false
+
+  -- Check for hexadecimal numbers
+  if self.curChar == '0' and (self:peek() == 'x' or self:peek() == 'X') then
+    isHex = true
+    insert(number, self:consume()) -- consume 'x' or 'X'
+  end
+
+  while self:peek():match((isHex and "[%da-fA-F]") or "[%d]") do
+    insert(number, self:consume())
+  end
+
+  -- Check for floating point numbers
+  if not isHex and self:peek() == "." then
+    isFloat = true
+    insert(number, self:consume()) -- consume '.'
+    while self:peek():match("[%d]") do
+      insert(number, self:consume())
+    end
+  end
+
+  -- Check for scientific notation
+  if not isHex and (self:peek() == "e" or self:peek() == "E") then
+    isScientific = true
+    insert(number, self:consume()) -- consume 'e' or 'E'
+    if self:peek():match("[+-]") then
+      insert(number, self:consume()) -- consume '+' or '-'
+    end
+    while self:peek():match("[%d]") do
+      insert(number, self:consume())
+    end
+  end
+
   return concat(number)
 end
 
@@ -112,7 +142,7 @@ end
 -- @return <Table> constantToken The next constant token.
 function LexerMethods:consumeConstant()
   -- <number>
-  if self:isDigit() then
+  if self:isNumber() then
     local newToken = self:consumeNumber()
     return createConstantToken(newToken)
   end
