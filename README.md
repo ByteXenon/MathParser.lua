@@ -2,12 +2,14 @@
 
 > A comprehensive, user-friendly math parser for Lua, featuring support for variables and customizable operator precedence.
 
+[![Lua Script Test](https://github.com/ByteXenon/MathParser.lua/actions/workflows/check-code.yaml/badge.svg)](https://github.com/ByteXenon/MathParser.lua/actions/workflows/check-code.yaml)
+
+
 ![Lua](https://img.shields.io/badge/Lua-5.1%2C%205.2%2C%205.3%2C%205.4-blue?style=for-the-badge&logo=lua)
 ![GitHub stars](https://img.shields.io/github/stars/ByteXenon/MathParser.lua?style=for-the-badge)
 ![License](https://img.shields.io/github/license/ByteXenon/MathParser.lua?style=for-the-badge)
 ![GitHub last commit](https://img.shields.io/github/last-commit/ByteXenon/MathParser.lua?style=for-the-badge)
 ![GitHub issues](https://img.shields.io/github/issues/ByteXenon/MathParser.lua?style=for-the-badge)
-![Lua Script Test](https://github.com/ByteXenon/MathParser.lua/actions/workflows/check-code.yaml/badge.svg)](https://github.com/ByteXenon/MathParser.lua/actions/workflows/check-code.yaml)
 
 MathParser.lua is a math parser for Lua, designed with a focus on simplicity and elegance. Each function is meticulously documented, making the codebase easy to read and understand. It comes with a suite of unit tests, ensuring reliability and ease of use.
 
