@@ -46,30 +46,50 @@ local result = MathParser:solve("2 + 2")
 -- result: 4
 ```
 
-### `MathParserMethods:setVariable(variableName, variableValue)`
-Sets a variable to its value. This allows you to use variables in your mathematical expressions.
+### `MathParserMethods:addVariable(variableName, variableValue)`
+Adds a variable and sets its value.
 
 Example:
 ```lua
-MathParser:setVariable("x", 5)
+MathParser:addVariable("x", 5)
 local result = MathParser:solve("x + 2")
 -- result: 7
 ```
 
-### `MathParserMethods:setVariables(variables)`
-Sets multiple variables to their values. This is a convenience method for setting multiple variables at once.
+### `MathParserMethods:addVariables(variables)`
+Adds multiple variables and sets their values.
 
 Example:
 ```lua
-MathParser:setVariables({x = 5, y = 2})
+MathParser:addVariables({x = 5, y = 2})
 local result = MathParser:solve("x + y")
 -- result: 7
 ```
 
+### `MathParserMethods:addFunction(functionName, functionValue)`
+Adds a function to the parser, allowing it to be used in mathematical expressions.
+
+Example:
+```lua
+MathParser:addFunction("double", function(a) return a * 2 end)
+local result = MathParser:solve("double(5)")
+-- result: 10
+```
+
+### `MathParserMethods:addFunctions(functions)`
+Adds multiple functions to the parser, allowing them to be used in mathematical expressions.
+
+Example:
+```lua
+MathParser:addFunctions({double = function(a) return a * 2 end, triple = function(a) return a * 3 end})
+local result = MathParser:solve("double(5) + triple(5)")
+-- result: 25
+```
+
 ## Class
 
-### `MathParser:new(operatorPrecedences, variables, operatorFunctions)`
-Creates a new MathParser. You can specify operator precedences, variables, and operator functions to customize the behavior of the MathParser.
+### `MathParser:new(operatorPrecedences, variables, operatorFunctions, functions)`
+Creates a new MathParser. You can specify operator precedences, variables, operator functions, and functions. If you don't specify any of these, the default values will be used.
 
 Example:
 ```lua
@@ -87,6 +107,11 @@ local OPERATOR_PRECEDENCES = {
     ["-"] = 1
   },
 }
+
+local VARIABLES = {
+  x = 5
+}
+
 local OPERATOR_FUNCTIONS = {
   Unary = {
     ["-"] = function(a) return -a end,
@@ -97,13 +122,13 @@ local OPERATOR_FUNCTIONS = {
   }
 }
 
-local VARIABLES = {
-  x = 5
+local FUNCTIONS = {
+  double = function(a) return a * 2 end
 }
 
 -- Create an instance of MathParser with custom operator precedences and functions
-local myMathParser = MathParser:new(OPERATOR_PRECEDENCES, VARIABLES, OPERATOR_FUNCTIONS)
-local result = myMathParser:solve("2 - 1 + --x")
+local myMathParser = MathParser:new(OPERATOR_PRECEDENCES, VARIABLES, OPERATOR_FUNCTIONS, FUNCTIONS)
+local result = myMathParser:solve("2 - -x + double(2)")
 
-print(result) -- Outputs: 6
+print(result) -- Outputs: 11
 ```
