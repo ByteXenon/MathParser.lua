@@ -33,6 +33,12 @@ runUnitTest("2 ^ 3", 8, "Exponentiation")
 runUnitTest("2 ^ 3 ^ 2", 512, "Exponentiation (right-associative)")
 runUnitTest("a + test", 15, "Variable substitution")
 runUnitTest("(2 + 3) * 4 - 5", 15, "Complex expression")
+runUnitTest("1.5 + 2.5", 4, "Floating point numbers")
+runUnitTest(".5 + .5", 1, "Floating point numbers (leading decimal point)")
+runUnitTest("2e3 + 2e+3", 4000, "Scientific notation (positive exponent)")
+runUnitTest("2e3 - 2e-3", 1999.998, "Scientific notation (negative exponent)")
+runUnitTest(".5e3 + .5e-3", 500.0005, "Scientific notation (leading decimal point)")
+
 
 -- Error handling tests
 local function runErrorHandlingTest(expression, testName)
