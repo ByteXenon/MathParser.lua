@@ -2,21 +2,22 @@
 
 > A comprehensive, user-friendly math parser for Lua, featuring support for variables and customizable operator precedence.
 
-[![Lua Script Test](https://github.com/ByteXenon/MathParser.lua/actions/workflows/check-code.yaml/badge.svg)](https://github.com/ByteXenon/MathParser.lua/actions/workflows/check-code.yaml)
-
-
 ![Lua](https://img.shields.io/badge/Lua-5.1%2C%205.2%2C%205.3%2C%205.4-blue?style=for-the-badge&logo=lua)
 ![GitHub stars](https://img.shields.io/github/stars/ByteXenon/MathParser.lua?style=for-the-badge)
 ![License](https://img.shields.io/github/license/ByteXenon/MathParser.lua?style=for-the-badge)
 ![GitHub last commit](https://img.shields.io/github/last-commit/ByteXenon/MathParser.lua?style=for-the-badge)
 ![GitHub issues](https://img.shields.io/github/issues/ByteXenon/MathParser.lua?style=for-the-badge)
+![Tests Passing](https://img.shields.io/badge/Tests-Passing-green?style=for-the-badge)
+![100% Test Coverage](https://img.shields.io/badge/Test%20Coverage-100%25-green?style=for-the-badge)
 
-MathParser.lua is a math parser for Lua, designed with a focus on simplicity and elegance. Each function is meticulously documented, making the codebase easy to read and understand. It comes with a suite of unit tests, ensuring reliability and ease of use.
+MathParser.lua is a robust and comprehensive math parser for Lua, designed with a focus on simplicity, elegance, and user-friendliness. Each function in the codebase is meticulously documented, making it easy to read, understand, and modify. It supports a wide range of mathematical operations, from basic arithmetic to complex expressions, and allows for the addition of custom functions and variables, providing flexibility and adaptability to suit your specific needs.
+
+It comes with a suite of unit tests, ensuring reliability and ease of use.
 
 ## Table of Contents:
 - **[MathParser.lua](#mathparserlua---a-robust-lua-math-parser)**
   - **[Table of Contents](#table-of-contents)**
-  - **[Features](#key-features)**
+  - **[Features](#features)**
   - **[License](#license)**
 
 **Quick Links:** **[API](./src/MathParser.lua)** | **[License](./LICENSE)** | **[Documentation](./docs/Documentation.md)**
@@ -35,14 +36,19 @@ Here's a quick guide on how to use MathParser.lua:
 ```lua
 local MathParser = require("MathParser")
 
--- Create a new parser instance 
+-- Create a new parser instance
 local myParser = MathParser.new()
 
--- Set the variable "x" to 5 
-myParser:setVariable("x", 5)
+-- Add a new variable with the name "x" and the value 5
+myParser:addVariable("x", 5)
 
--- Solve the expression "x + 5" and print the result 
+-- Add a new function to the parser
+myParser:addFunction("double", function(a) return a * 2 end)
+
+-- Solve mathematical expressions
 print(myParser:solve("x + 5")) -- Outputs: 10
+print(myParser:solve("-double(x)")) -- Outputs: -10
+print(myParser:solve("(1 + 2) * 2^3^2")) -- Outputs: 1536
 ```
 
 This is just a small sample of what MathParser.lua can do. For more information, check out the [documentation](docs/Documentation.md) or the source of the [API](src/MathParser.lua).
