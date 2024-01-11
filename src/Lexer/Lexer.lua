@@ -1,7 +1,7 @@
 --[[
   Name: Lexer.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-01-10
+  Date: 2024-01-11
 --]]
 
 --* Dependencies *--
@@ -19,6 +19,7 @@ local createConstantToken    = TokenFactory.createConstantToken
 local createVariableToken    = TokenFactory.createVariableToken
 local createParenthesesToken = TokenFactory.createParenthesesToken
 local createOperatorToken    = TokenFactory.createOperatorToken
+local createCommaToken       = TokenFactory.createCommaToken
 
 --* Constants *--
 local DEFAULT_OPERATORS = {"+", "-", "*", "/", "^", "%"}
@@ -69,18 +70,64 @@ function LexerMethods:isNumber(char)
   return char:match("[%d]") or (char == "." and self:peek():match("[%d]"))
 end
 
+--- Checks if the given character is a comma.
+-- @param <String?> char=self.curChar The character to check.
+-- @return <Boolean> isComma Whether the character is a comma.
+function LexerMethods:isComma(char)
+  local char = (char or self.curChar)
+  return char == ","
+end
+
 --- Checks if the given character is an identifier.
 -- @param <String?> char=self.curChar The character to check.
 -- @return <Boolean> isIdentifier Whether the character is an identifier.
 function LexerMethods:isIdentifier(char)
-  return (char or self.curChar):match("[a-zA-Z_]")
+  local char = (char or self.curChar)
+  return char:match("[a-zA-Z_]")
 end
 
 --- Checks if the given character is a whitespace.
 -- @param <String?> char=self.curChar The character to check.
 -- @return <Boolean> isWhitespace Whether the character is a whitespace.
 function LexerMethods:isWhitespace(char)
-  return (char or self.curChar):match("%s")
+  local char = (char or self.curChar)
+  return char:match("%s")
+end
+
+--- Consumes the next hexadecimal number from the character stream.
+-- @param <Table> number The number character table to append the next number to.
+-- @return <Table> number The parsed hexadecimal number.
+function LexerMethods:consumeHexNumber(number)
+  insert(number, self:consume()) -- consume 'x' or 'X'
+  while self:peek():match("[%da-fA-F]") do
+    insert(number, self:consume())
+  end
+  return number
+end
+
+--- Consumes the next floating point number from the character stream.
+-- @param <Table> number The number character table to append the next number to.
+-- @return <Tabel> number The parsed floating point number.
+function LexerMethods:consumeFloatNumber(number)
+  insert(number, self:consume())
+  while self:peek():match("[%d]") do
+    insert(number, self:consume())
+  end
+  return number
+end
+
+--- Consumes the next number in scientific notation from the character stream.
+-- @param <Table> number The number character table to append the next number to.
+-- @return <Table> number The parsed number in scientific notation
+function LexerMethods:consumeScientificNumber(number)
+  insert(number, self:consume()) -- consume 'e' or 'E'
+  if self:peek():match("[+-]") then
+    insert(number, self:consume()) -- consume '+' or '-'
+  end
+  while self:peek():match("[%d]") do
+    insert(number, self:consume())
+  end
+  return number
 end
 
 --- Consumes the next number from the character stream.
@@ -93,33 +140,21 @@ function LexerMethods:consumeNumber()
 
   -- Check for hexadecimal numbers
   if self.curChar == '0' and (self:peek() == 'x' or self:peek() == 'X') then
-    isHex = true
-    insert(number, self:consume()) -- consume 'x' or 'X'
+    return concat(self:consumeHexNumber(number))
   end
 
-  while self:peek():match((isHex and "[%da-fA-F]") or "[%d]") do
+  while self:peek():match("[%d]") do
     insert(number, self:consume())
   end
 
   -- Check for floating point numbers
-  if not isHex and self:peek() == "." then
-    isFloat = true
-    insert(number, self:consume()) -- consume '.'
-    while self:peek():match("[%d]") do
-      insert(number, self:consume())
-    end
+  if self:peek() == "." then
+    number = self:consumeFloatNumber(number)
   end
 
   -- Check for scientific notation
-  if not isHex and (self:peek() == "e" or self:peek() == "E") then
-    isScientific = true
-    insert(number, self:consume()) -- consume 'e' or 'E'
-    if self:peek():match("[+-]") then
-      insert(number, self:consume()) -- consume '+' or '-'
-    end
-    while self:peek():match("[%d]") do
-      insert(number, self:consume())
-    end
+  if self:peek() == "e" or self:peek() == "E" then
+    number = self:consumeScientificNumber(number)
   end
 
   return concat(number)
@@ -142,14 +177,14 @@ end
 -- @return <Table> constantToken The next constant token.
 function LexerMethods:consumeConstant()
   -- <number>
-  if self:isNumber() then
+  if self:isNumber(self.curChar) then
     local newToken = self:consumeNumber()
     return createConstantToken(newToken)
   end
 
   local errorMessage = self:generateError(
     "Unexpected character: '" .. self.curChar
-    .. "', expected one of: {<whitespace>, <parentheses>, <operator>, <number>}"
+    .. "', expected one of: {<whitespace>, <parentheses>, <comma>, <operator>, <number>}"
   )
   error(errorMessage)
   return
@@ -160,15 +195,17 @@ end
 function LexerMethods:consumeToken()
   local curChar = self.curChar
 
-  if self:isWhitespace() then
+  if self:isWhitespace(curChar) then
     -- Return nothing, so the token gets ignored and skipped
     return
-  elseif self:isParenthesis() then
+  elseif self:isParenthesis(curChar) then
     return createParenthesesToken(curChar)
-  elseif self:isIdentifier() then
+  elseif self:isIdentifier(curChar) then
     return createVariableToken(self:consumeIdentifier())
   elseif find(self.operators, curChar) then
     return createOperatorToken(curChar)
+  elseif self:isComma(curChar) then
+    return createCommaToken()
   else
     return self:consumeConstant()
   end
