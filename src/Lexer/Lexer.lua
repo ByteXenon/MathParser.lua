@@ -1,7 +1,7 @@
 --[[
   Name: Lexer.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-01-11
+  Date: 2024-02-08
 --]]
 
 --* Dependencies *--
@@ -20,6 +20,32 @@ local createVariableToken    = TokenFactory.createVariableToken
 local createParenthesesToken = TokenFactory.createParenthesesToken
 local createOperatorToken    = TokenFactory.createOperatorToken
 local createCommaToken       = TokenFactory.createCommaToken
+
+--* Local functions *--
+
+--- Creates a trie from the given operators, it's used to support 2+ character (potentional) operators.
+-- @param <Table> table The operators to create the trie from.
+-- @return <Table> trieTable The trie table.
+-- @return <Number> longestElement The length of the longest operator.
+local function makeTrie(table)
+  local trieTable = {}
+  local longestElement = 0
+
+  for _, op in ipairs(table) do
+    if #op > longestElement then
+      longestElement = #op
+    end
+
+    local node = trieTable
+    for index = 1, #op do
+      local character = op:sub(index, index)
+      node[character] = node[character] or {}
+      node = node[character]
+    end
+    node.value = op
+  end
+  return trieTable, longestElement
+end
 
 --* Constants *--
 local DEFAULT_OPERATORS = {"+", "-", "*", "/", "^", "%"}
@@ -190,20 +216,47 @@ function LexerMethods:consumeConstant()
   return
 end
 
+--- Consumes the next operator from the character stream.
+-- @return <Table> operatorToken The next operator token.
+function LexerMethods:consumeOperator()
+  -- NOTE: Checking whether the current character is an operator is too expensive,
+  --       so we use only this function to check if the current character is an operator.
+  --       If it returns nil, then the current character is not an operator.
+  local node = self.operatorsTrie
+  local longestOperator = self.longestOperator
+  local operator
+
+  for index = 0, longestOperator - 1 do
+    -- Use peek() instead of consume() to avoid backtracking
+    local character = self:peek(index)
+    node = node[character] -- Advance to the deeper node
+    if not node then break end
+    if node.value then
+      operator = node.value
+    end
+  end
+  if operator then self:consume(#operator - 1) end
+
+  return operator
+end
+
 --- Consumes the next token from the character stream.
 -- @return <Table> token The next token.
 function LexerMethods:consumeToken()
   local curChar = self.curChar
+  -- We dont consume characters here if they're not operators
+  local operator = self:consumeOperator()
 
   if self:isWhitespace(curChar) then
     -- Return nothing, so the token gets ignored and skipped
     return
+
+  elseif operator then
+    return createOperatorToken(operator)
   elseif self:isParenthesis(curChar) then
     return createParenthesesToken(curChar)
   elseif self:isIdentifier(curChar) then
     return createVariableToken(self:consumeIdentifier())
-  elseif find(self.operators, curChar) then
-    return createOperatorToken(curChar)
   elseif self:isComma(curChar) then
     return createCommaToken()
   else
@@ -246,6 +299,7 @@ function LexerMethods:resetToInitialState(charStream, operators)
   self.curCharPos = 1
 
   self.operators = operators or DEFAULT_OPERATORS
+  self.operatorsTrie, self.longestOperator = makeTrie(self.operators)
 end
 
 --- Runs the lexer.
@@ -271,6 +325,7 @@ function Lexer:new(expression, operators, charPos)
     LexerInstance.curCharPos = charPos or 1
   end
   LexerInstance.operators = operators or DEFAULT_OPERATORS
+  LexerInstance.operatorsTrie, LexerInstance.longestOperator = makeTrie(LexerInstance.operators)
 
   local function inheritModule(moduleName, moduleTable)
     for index, value in pairs(moduleTable) do
