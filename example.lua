@@ -1,15 +1,44 @@
+-- Dependencies
 local MathParser = require("MathParser")
 
--- Create a new parser instance
-local myParser = MathParser.new()
+-- Create an instance of MathParser with default settings
+local myMathParser = MathParser:new()
 
--- Add a new variable with the name "x" and the value 5
-myParser:addVariable("x", 5)
+-- Solve a basic expression
+local result = myMathParser:solve("2 + 2")
+print(result) -- Outputs: 4
 
--- Add a new function to the parser
-myParser:addFunction("double", function(a) return a * 2 end)
+-- Now, let's add a variable
+myMathParser:addVariable("x", 5)
+result = myMathParser:solve("x + 2")
+print(result) -- Outputs: 7
 
--- Solve mathematical expressions
-print(myParser:solve("x + 5")) -- Outputs: 10
-print(myParser:solve("-double(x)")) -- Outputs: -10
-print(myParser:solve("(1 + 2) * 2^3^2")) -- Outputs: 1536
+-- Add a function
+myMathParser:addFunction("double", function(a) return a * 2 end)
+result = myMathParser:solve("double(x) * 2")
+print(result) -- Outputs: 20
+
+-- Now, let's customize operator precedence and functions
+local OPERATOR_PRECEDENCE_LEVELS = {
+  Unary = { ["-"] = 2 },
+  Binary = { ["+"] = 1, ["-"] = 1, ["++"] = 1 }
+}
+
+local OPERATOR_FUNCTIONS = {
+  Unary = { ["-"] = function(a) return -a end },
+  Binary = {
+    ["+"] = function(a, b) return a + b end,
+    ["-"] = function(a, b) return a - b end,
+    ["++"] = function(a, b) return 2 * (a + b) end
+  }
+}
+
+local VARIABLES, FUNCTIONS = {}, {}
+
+-- When you add a custom operator, you have to also add it to the operators table
+-- (Unary minus and normal minus signs are the same, so we don't need to add another "-" to the table)
+local OPERATORS = { "+", "-", "++" }
+
+myMathParser = MathParser:new(OPERATOR_PRECEDENCE_LEVELS, VARIABLES, OPERATOR_FUNCTIONS, OPERATORS, FUNCTIONS)
+result = myMathParser:solve("2 ++ 2")
+print(result) -- Outputs: 8
