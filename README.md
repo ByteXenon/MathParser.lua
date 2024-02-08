@@ -1,6 +1,6 @@
 # MathParser.lua - A Robust Lua Math Parser
 
-> A comprehensive, user-friendly math parser for Lua, featuring support for variables and customizable operator precedence.
+> A comprehensive, user-friendly math parser for Lua, featuring support for variables, functions and customizable operator precedence.
 
 ![Lua](https://img.shields.io/badge/Lua-5.1%2C%205.2%2C%205.3%2C%205.4-blue?style=for-the-badge&logo=lua)
 ![GitHub stars](https://img.shields.io/github/stars/ByteXenon/MathParser.lua?style=for-the-badge)
@@ -20,7 +20,7 @@ It comes with a suite of unit tests, ensuring reliability and ease of use.
   - **[Features](#features)**
   - **[License](#license)**
 
-**Quick Links:** **[API](./src/MathParser.lua)** | **[License](./LICENSE)** | **[Documentation](./docs/Documentation.md)**
+**Quick Links:** **[API](./src/MathParser.lua)** | **[License](./LICENSE)** | **[Documentation](./docs/Documentation.md)** | **[Example](./example.lua)**
 
 ## Features
 
@@ -51,7 +51,7 @@ print(myParser:solve("-double(x)")) -- Outputs: -10
 print(myParser:solve("(1 + 2) * 2^3^2")) -- Outputs: 1536
 ```
 
-This is just a small sample of what MathParser.lua can do. For more information, check out the [documentation](docs/Documentation.md) or the source of the [API](src/MathParser.lua).
+This is just a small sample of what MathParser.lua can do. For more information, check out the [documentation](docs/Documentation.md), the source of the [API](src/MathParser.lua), or the [example usage](./example.lua).
 
 ## License
 
