@@ -1,7 +1,7 @@
 --[[
   Name: Parser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-01-11
+  Date: 2024-02-08
 --]]
 
 --* Dependencies *--
@@ -15,7 +15,7 @@ local createOperatorNode = NodeFactory.createOperatorNode
 local createFunctionCallNode = NodeFactory.createFunctionCallNode
 
 --* Constants *--
-local DEFAULT_OPERATOR_PRECEDENCES = {
+local DEFAULT_OPERATOR_PRECEDENCE_LEVELS = {
   Unary = {
     -- Unary minus precedence
     ["-"] = 4
@@ -59,8 +59,8 @@ end
 -- @return <Boolean> isBinaryOperator Whether the token is a binary operator.
 function ParserMethods:isBinaryOperator(token)
   local token = token or self.currentToken
-  if not self.operatorPrecedences.Binary then return end
-  return token and token.TYPE == "Operator" and self.operatorPrecedences.Binary[token.Value]
+  if not self.operatorPrecedenceLevels.Binary then return end
+  return token and token.TYPE == "Operator" and self.operatorPrecedenceLevels.Binary[token.Value]
 end
 
 --- Checks if the given token is an unary operator.
@@ -68,8 +68,8 @@ end
 -- @return <Boolean> isUnaryOperator Whether the token is an unary operator.
 function ParserMethods:isUnaryOperator(token)
   local token = token or self.currentToken
-  if not self.operatorPrecedences.Unary then return end
-  return token and token.TYPE == "Operator" and self.operatorPrecedences.Unary[token.Value]
+  if not self.operatorPrecedenceLevels.Unary then return end
+  return token and token.TYPE == "Operator" and self.operatorPrecedenceLevels.Unary[token.Value]
 end
 
 --- Checks if the given token is a right associative binary operator.
@@ -77,8 +77,8 @@ end
 -- @return <Boolean> isRightAssociativeBinaryOperator Whether the token is a right associative binary operator.
 function ParserMethods:isRightAssociativeBinaryOperator(token)
   local token = token or self.currentToken
-  if not self.operatorPrecedences.RightAssociativeBinaryOperators then return end
-  return token and token.TYPE == "Operator" and self.operatorPrecedences.RightAssociativeBinaryOperators[token.Value]
+  if not self.operatorPrecedenceLevels.RightAssociativeBinaryOperators then return end
+  return token and token.TYPE == "Operator" and self.operatorPrecedenceLevels.RightAssociativeBinaryOperators[token.Value]
 end
 
 --- Checks if the current token is a function call
@@ -94,7 +94,7 @@ end
 -- @param <Table> token The token to get the precedence of.
 -- @return <Number> precedence The precedence of the token.
 function ParserMethods:getPrecedence(token)
-  return token and self.operatorPrecedences.Binary[token.Value]
+  return token and self.operatorPrecedenceLevels.Binary[token.Value]
 end
 
 --- Parses the function call.
@@ -208,15 +208,15 @@ end
 
 --- Resets the parser to its initial state so it can be reused.
 -- @param <Table> tokens The tokens to reset to.
--- @param <Table?> operatorPrecedences=DEFAULT_OPERATOR_PRECEDENCES The operator precedences to reset to.
-function ParserMethods:resetToInitialState(tokens, operatorPrecedences)
+-- @param <Table?> operatorPrecedenceLevels=DEFAULT_OPERATOR_PRECEDENCE_LEVELS The operator precedence levels to reset to.
+function ParserMethods:resetToInitialState(tokens, operatorPrecedenceLevels)
   assert(tokens, "No tokens given")
 
   self.tokens = tokens
   self.currentToken = tokens[1]
   self.currentTokenIndex = 1
 
-  self.operatorPrecedences = operatorPrecedences or DEFAULT_OPERATOR_PRECEDENCES
+  self.operatorPrecedenceLevels = operatorPrecedenceLevels or DEFAULT_OPERATOR_PRECEDENCE_LEVELS
 end
 
 --- Parses the given tokens, and returns the AST.
@@ -238,17 +238,17 @@ local Parser = {}
 
 --- @class Creates a new Parser instance
 -- @param <Table> tokens The tokens to parse
--- @param <Table?> operatorPrecedences=DEFAULT_OPERATOR_PRECEDENCES The operator precedences to use in the parser
+-- @param <Table?> operatorPrecedenceLevels=DEFAULT_OPERATOR_PRECEDENCE_LEVELS The operator precedence levels to use in the parser
 -- @param <Number?> tokenIndex=1 The index of the current token
 -- @return <Table> ParserInstance The Parser instance
-function Parser:new(tokens, operatorPrecedences, tokenIndex)
+function Parser:new(tokens, operatorPrecedenceLevels, tokenIndex)
   local ParserInstance = {}
   if tokens then
     ParserInstance.tokens = tokens
     ParserInstance.currentTokenIndex = tokenIndex or 1
     ParserInstance.currentToken = tokens[ParserInstance.currentTokenIndex]
   end
-  ParserInstance.operatorPrecedences = operatorPrecedences or DEFAULT_OPERATOR_PRECEDENCES
+  ParserInstance.operatorPrecedenceLevels = operatorPrecedenceLevels or DEFAULT_OPERATOR_PRECEDENCE_LEVELS
 
   local function inheritModule(moduleName, moduleTable)
     for index, value in pairs(moduleTable) do
