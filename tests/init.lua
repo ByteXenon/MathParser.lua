@@ -53,6 +53,38 @@ runUnitTest("log(10, 100)", math.log(10, 100), "Function call with multiple argu
 runUnitTest("log(sin(1), cos(1))", math.log(math.sin(1), math.cos(1)), "Function call (log) with multiple arguments-function-calls (sin, cos)")
 runUnitTest("testFunction(2, 3)", 5, "Custom function call (testFunction)")
 
+-- Advanced tests
+local CUSTOM_OPERATOR_PRECEDENCE_LEVELS = {
+  Unary = { ["-"] = 3 },
+  Binary = { ["+"] = 1, ["-"] = 1, ["++"] = 1, ["///"] = 2, ["/"] = 2 }
+}
+local CUSTOM_OPERATORS = { "+", "-", "++", "///", "/" }
+local CUSTOM_OPERATOR_FUNCTIONS = {
+  Unary = { ["-"] = function(a) return -a end },
+  Binary = {
+    ["+"] = function(a, b) return a + b end,
+    ["-"] = function(a, b) return a - b end,
+    ["/"] = function(a, b) return a / b end,
+
+    -- Custom operators
+    ["++"] = function(a, b) return 2 * (a + b) end,
+    -- Instead of "//", I used "///" to check how the trie node traversal works
+    ["///"] = function(a, b) return 2 * (a / b) end
+  }
+}
+
+myMathParser:setOperatorPrecedenceLevels(CUSTOM_OPERATOR_PRECEDENCE_LEVELS)
+myMathParser:setOperators(CUSTOM_OPERATORS)
+myMathParser:setOperatorFunctions(CUSTOM_OPERATOR_FUNCTIONS)
+
+runUnitTest("10 ++ 10", 40, "Custom operator precedence (++)")
+runUnitTest("10 /// 10", 2, "Custom operator precedence (///)")
+runUnitTest("10 / 10", 1, "Custom (normal) operator precedence (/)")
+runUnitTest("10 + 10", 20, "Custom (normal) operator precedence (+)")
+
+-- Reset the parser to default settings
+myMathParser:resetToInitialState()
+
 -- Error handling tests
 local function runErrorHandlingTest(expression, testName)
   local status, err = pcall(function()
