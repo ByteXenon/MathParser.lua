@@ -86,6 +86,62 @@ local result = MathParser:solve("double(5) + triple(5)")
 -- result: 25
 ```
 
+### `MathParserMethods:setOperatorPrecedenceLevels(operatorPrecedenceLevels)`
+Sets the operator precedence levels that the parser will use.
+
+Example:
+```lua
+MathParser:setOperatorPrecedenceLevels({
+  Unary = { ["-"] = 2 },
+  Binary = { ["+"] = 1, ["-"] = 1, ["++"] = 1 }
+})
+```
+
+### `MathParserMethods:setVariables(variables)`
+Sets the variables that the evaluator will use.
+
+Example:
+```lua
+MathParser:setVariables({x = 5, y = 2})
+```
+
+### `MathParserMethods:setOperatorFunctions(operatorFunctions)`
+Sets the operator functions that the evaluator will use.
+
+Example:
+```lua
+MathParser:setOperatorFunctions({
+  Unary = { ["-"] = function(a) return -a end },
+  Binary = {
+    ["+"] = function(a, b) return a + b end,
+    ["-"] = function(a, b) return a - b end,
+    ["++"] = function(a, b) return 2 * (a + b) end
+  }
+})
+```
+
+### `MathParserMethods:setOperators(operators)`
+Sets the operators that the lexer will use.
+
+Example:
+```lua
+MathParser:setOperators({"+", "-", "++"})
+```
+
+### `MathParserMethods:setFunctions(functions)`
+Sets the functions that the evaluator will use.
+
+Example:
+```lua
+MathParser:setFunctions({
+  double = function(a) return a * 2 end,
+  triple = function(a) return a * 3 end
+})
+```
+
+### `MathParserMethods:resetToInitialState(operatorPrecedenceLevels, variables, operatorFunctions, operators, functions)`
+Resets the `MathParser` to its initial state with the provided operator precedence levels, variables, operator functions, operators, and functions. If any of these parameters are not provided, the corresponding property will be reset to its default value.
+
 ## Class
 
 ### `MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, operators, functions)`
