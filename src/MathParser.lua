@@ -1,7 +1,7 @@
 --[[
   Name: MathParser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-01-11
+  Date: 2024-02-08
 --]]
 
 -- Localize the path, so this file can be run from anywhere
@@ -32,7 +32,7 @@ end
 -- @param <Table> tokens The tokens to parse.
 -- @return <Table> AST The AST of the tokens.
 function MathParserMethods:parse(tokens)
-  self.Parser:resetToInitialState(tokens, self.operatorPrecedences)
+  self.Parser:resetToInitialState(tokens, self.operatorPrecedenceLevels)
   local AST = self.Parser:parse()
   return AST
 end
@@ -85,27 +85,73 @@ function MathParserMethods:addFunctions(functions)
   end
 end
 
+--- Sets the operator precedence levels that the parser will use.
+-- @param <Table> operatorPrecedenceLevels The operator precedence levels to use in the parser.
+function MathParserMethods:setOperatorPrecedenceLevels(operatorPrecedenceLevels)
+  self.operatorPrecedenceLevels = operatorPrecedenceLevels
+end
+
+--- Sets the variables that the evaluator will use.
+-- @param <Table> variables The variables to use in the evaluator.
+function MathParserMethods:setVariables(variables)
+  self.variables = variables
+end
+
+--- Sets the operator functions that the evaluator will use.
+-- @param <Table> operatorFunctions The operator functions to evaluate in the evaluator.
+function MathParserMethods:setOperatorFunctions(operatorFunctions)
+  self.operatorFunctions = operatorFunctions
+end
+
+--- Sets the operators that the lexer will use.
+-- @param <Table> operators The operators that the lexer will use.
+function MathParserMethods:setOperators(operators)
+  self.operators = operators
+end
+
+--- Sets the functions that the evaluator will use.
+-- @param <Table> functions The functions to use in the evaluator
+function MathParserMethods:setFunctions(functions)
+  self.functions = functions
+end
+
+--- Resets the MathParser to its initial state.
+-- @param <Table> operatorPrecedenceLevels The operator precedence levels to use in the parser.
+-- @param <Table> variables The variables to use in the evaluator.
+-- @param <Table> operatorFunctions The operator functions to evaluate in the evaluator.
+-- @param <Table> operators The operators to use in the lexer.
+-- @param <Table> functions The functions to use in the evaluator
+function MathParserMethods:resetToInitialState(operatorPrecedenceLevels, variables, operatorFunctions, operators, functions)
+  self.operatorPrecedenceLevels = operatorPrecedenceLevels
+  self.variables = variables
+  self.operatorFunctions = operatorFunctions
+  self.operators = operators
+  self.functions = functions
+end
+
 --* MathParser *--
 local MathParser = {}
 
 --- @class Creates a new MathParser.
--- @param <Table> operatorPrecedences The operator precedences to use in the parser.
+-- @param <Table> operatorPrecedenceLevels The operator precedence levels to use in the parser.
 -- @param <Table> variables The variables to use in the evaluator.
 -- @param <Table> operatorFunctions The operator functions to evaluate in the evaluator.
+-- @param <Table> operators The operators to use in the lexer.
 -- @param <Table> functions The functions to use in the evaluator
 -- @return <Table> MathParserInstance The MathParser instance.
-function MathParser:new(operatorPrecedences, variables, operatorFunctions, functions)
+function MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, operators, functions)
   local MathParserInstance = {}
 
   -- Properties
-  MathParserInstance.operatorPrecedences = operatorPrecedences
+  MathParserInstance.operatorPrecedenceLevels = operatorPrecedenceLevels
   MathParserInstance.variables = variables
   MathParserInstance.operatorFunctions = operatorFunctions
+  MathParserInstance.operators = operators
   MathParserInstance.functions = functions
 
   -- Classes
-  MathParserInstance.Lexer = Lexer:new(nil)
-  MathParserInstance.Parser = Parser:new(nil, operatorPrecedences)
+  MathParserInstance.Lexer = Lexer:new(nil, operators)
+  MathParserInstance.Parser = Parser:new(nil, operatorPrecedenceLevels)
   MathParserInstance.Evaluator = Evaluator:new(nil, variables, operatorFunctions, functions)
 
   local function inheritModule(moduleName, moduleTable)
