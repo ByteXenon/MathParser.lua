@@ -88,8 +88,8 @@ local result = MathParser:solve("double(5) + triple(5)")
 
 ## Class
 
-### `MathParser:new(operatorPrecedences, variables, operatorFunctions, functions)`
-Creates a new MathParser. You can specify operator precedences, variables, operator functions, and functions. If you don't specify any of these, the default values will be used.
+### `MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, operators, functions)`
+Creates a new MathParser. You can specify operator precedence levels, variables, operator functions, operators, and functions. If you don't specify any of these, the default values will be used.
 
 Example:
 ```lua
@@ -97,7 +97,7 @@ Example:
 local MathParser = require("MathParser")
 
 --* Constants *--
-local OPERATOR_PRECEDENCES = {
+local OPERATOR_PRECEDENCE_LEVELS = {
   Unary = {
     -- Unary minus precedence
     ["-"] = 2
@@ -122,12 +122,14 @@ local OPERATOR_FUNCTIONS = {
   }
 }
 
+local OPERATORS = { "-", "+" }
+
 local FUNCTIONS = {
   double = function(a) return a * 2 end
 }
 
--- Create an instance of MathParser with custom operator precedences and functions
-local myMathParser = MathParser:new(OPERATOR_PRECEDENCES, VARIABLES, OPERATOR_FUNCTIONS, FUNCTIONS)
+-- Create an instance of MathParser with custom operator precedence levels and functions
+local myMathParser = MathParser:new(OPERATOR_PRECEDENCE_LEVELS, VARIABLES, OPERATOR_FUNCTIONS, OPERATORS, FUNCTIONS)
 local result = myMathParser:solve("2 - -x + double(2)")
 
 print(result) -- Outputs: 11
