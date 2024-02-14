@@ -55,4 +55,4 @@ This is just a small sample of what MathParser.lua can do. For more information,
 
 ## License
 
-MathParser.lua is licensed under the [AGPL-3.0 License](LICENSE).
+MathParser.lua is (re)licensed under the [MIT License](LICENSE).
