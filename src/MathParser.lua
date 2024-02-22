@@ -1,7 +1,7 @@
 --[[
   Name: MathParser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-02-08
+  Date: 2024-02-20
 --]]
 
 -- Localize the path, so this file can be run from anywhere
@@ -31,8 +31,8 @@ end
 --- Parses the given tokens.
 -- @param <Table> tokens The tokens to parse.
 -- @return <Table> AST The AST of the tokens.
-function MathParserMethods:parse(tokens)
-  self.Parser:resetToInitialState(tokens, self.operatorPrecedenceLevels)
+function MathParserMethods:parse(tokens, expression)
+  self.Parser:resetToInitialState(tokens, self.operatorPrecedenceLevels, nil, expression)
   local AST = self.Parser:parse()
   return AST
 end
@@ -50,7 +50,7 @@ end
 -- @param <String> expression The expression to solve.
 -- @return <Number> result The result of the expression.
 function MathParserMethods:solve(expression)
-  return self:evaluate(self:parse(self:tokenize(expression)))
+  return self:evaluate(self:parse(self:tokenize(expression), expression))
 end
 
 --- Adds a variable to its value.

@@ -1,36 +1,43 @@
 --[[
   Name: Parser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-02-08
+  Date: 2024-02-21
 --]]
 
 --* Dependencies *--
+local Helpers = require("Helpers/Helpers")
 local NodeFactory = require("Parser/NodeFactory")
 
 --* Imports *--
+local stringToTable = Helpers.stringToTable
 local insert = table.insert
+local concat = table.concat
+local max = math.max
+local min = math.min
+local rep = string.rep
 
 local createUnaryOperatorNode = NodeFactory.createUnaryOperatorNode
 local createOperatorNode = NodeFactory.createOperatorNode
 local createFunctionCallNode = NodeFactory.createFunctionCallNode
 
 --* Constants *--
+
+-- Error Messages --
+local ERROR_NO_TOKENS = "No tokens given"
+local ERROR_NO_TOKENS_TO_PARSE = "No tokens to parse"
+local ERROR_EXPECTED_EOF = "Expected EOF, got '%s'"
+local ERROR_UNEXPECTED_TOKEN = "Unexpected token: '%s' in <primary>, expected constant, variable or function call"
+local ERROR_EXPECTED_EXPRESSION = "Expected expression, got EOF"
+local ERROR_EXPECTED_CLOSING_PARENTHESIS = "Expected ')', got EOF"
+local ERROR_EXPECTED_COMMA_OR_CLOSING_PARENTHESIS = "Expected ',' or ')', got '%s'"
+local ERROR_NO_CHARSTREAM = "<No charStream, error message: %s>"
+
 local DEFAULT_OPERATOR_PRECEDENCE_LEVELS = {
-  Unary = {
-    -- Unary minus precedence
-    ["-"] = 4
-  },
-  Binary = {
-    ["^"] = 3,
-    ["*"] = 2,
-    ["/"] = 2,
-    ["%"] = 2,
-    ["+"] = 1,
-    ["-"] = 1
-  },
-  RightAssociativeBinaryOperators = {
-    ["^"] = true
-  }
+  Unary = {    ["-"] = 4 },
+  Binary = {   ["^"] = 3,
+    ["*"] = 2, ["/"] = 2, ["%"] = 2,
+    ["+"] = 1, ["-"] = 1 },
+  RightAssociativeBinaryOperators = { ["^"] = true }
 }
 
 --* ParserMethods *--
@@ -97,12 +104,32 @@ function ParserMethods:getPrecedence(token)
   return token and self.operatorPrecedenceLevels.Binary[token.Value]
 end
 
+--- Generate error message pointing to the current token.
+-- @param <String> message The error message.
+function ParserMethods:generateError(message)
+  if not self.charStream then
+    -- In case we don't have the charStream, we can't generate a proper error message
+    return ERROR_NO_CHARSTREAM:format(message)
+  end
+
+  local currentToken = self.currentToken
+  local position = (not currentToken and #self.charStream + 1) or currentToken.Position
+  local strippedExpressionTable = {}
+  for index = max(1, position - 20), min(position + 20, #self.charStream) do
+    insert(strippedExpressionTable, self.charStream[index])
+  end
+  local strippedExpression = table.concat(strippedExpressionTable)
+  -- Make a pointer under the current token
+  local pointer = rep(" ", position - 1) .. "^"
+  return "\n" .. strippedExpression .. "\n" .. pointer .. "\n" .. message
+end
+
 --- Parses the function call.
 -- @return <Table> expression The AST of the function call.
 function ParserMethods:parseFunctionCall()
   -- <function call> ::= <variable> "(" <expression> ["," <expression>]* ")"
   local functionName = self.currentToken.Value
-  self:consume() -- Consume the variable
+  self:consume() -- Consume the variable (function name)
   self:consume() -- Consume the opening parenthesis
   local arguments = {}
   while true do
@@ -111,16 +138,22 @@ function ParserMethods:parseFunctionCall()
 
     local currentToken = self.currentToken
     if not currentToken then
-      error("Expected ')', got EOF")
+      -- A little bit of backtracking to give a better error message
+      local lastToken = self:peek(-1)
+      if lastToken.TYPE == "Comma" then
+        error(self:generateError(ERROR_EXPECTED_EXPRESSION))
+      end
+      error(self:generateError(ERROR_EXPECTED_CLOSING_PARENTHESIS))
     elseif currentToken.Value == ")" then
       break
     elseif currentToken.TYPE == "Comma" then
       self:consume() -- Consume the comma
     else -- Unexpected token
-      error("Expected ',' or ')', got '" .. currentToken.Value .. "'")
+      -- Is it even possible to reach this?
+      error(self:generateError(ERROR_EXPECTED_COMMA_OR_CLOSING_PARENTHESIS:format(currentToken.Value)))
     end
   end
-  self:consume()
+  self:consume() -- Consume the closing parenthesis
   return createFunctionCallNode(functionName, arguments)
 end
 
@@ -139,7 +172,9 @@ function ParserMethods:parseBinaryOperator(minPrecedence)
       break
     end
 
-    self:consume() -- Consume the operator
+    if not self:consume() then -- Consume the operator
+      error(self:generateError(ERROR_EXPECTED_EXPRESSION))
+    end
     local right = self:parseBinaryOperator(precedence)
     expression = createOperatorNode(currentToken.Value, expression, right)
     currentToken = self.currentToken
@@ -158,7 +193,10 @@ function ParserMethods:parseUnaryOperator()
   end
   -- <unary operator> <unary>
   local operator = currentToken.Value
-  self:consume() -- Consume the operator
+  if not self:consume() then -- Consume the operator
+    error(self:generateError(ERROR_EXPECTED_EXPRESSION))
+  end
+
   local expression = self:parseUnaryOperator()
   return createUnaryOperatorNode(operator, expression)
 end
@@ -176,7 +214,7 @@ function ParserMethods:parsePrimaryExpression()
     self:consume() -- Consume the opening parenthesis
     local expression = self:parseExpression()
     if not self.currentToken or self.currentToken.Value ~= ")" then
-      error("Mismatched parentheses")
+      error(self:generateError(ERROR_EXPECTED_CLOSING_PARENTHESIS))
     end
     self:consume() -- Consume the closing parenthesis
     return expression
@@ -194,7 +232,7 @@ function ParserMethods:parsePrimaryExpression()
     return token
   end
 
-  error("Unexpected token: '" .. value .. "'")
+  error(self:generateError(ERROR_UNEXPECTED_TOKEN:format(value)))
 end
 
 --- Parses the expression.
@@ -209,25 +247,26 @@ end
 --- Resets the parser to its initial state so it can be reused.
 -- @param <Table> tokens The tokens to reset to.
 -- @param <Table?> operatorPrecedenceLevels=DEFAULT_OPERATOR_PRECEDENCE_LEVELS The operator precedence levels to reset to.
-function ParserMethods:resetToInitialState(tokens, operatorPrecedenceLevels)
-  assert(tokens, "No tokens given")
+function ParserMethods:resetToInitialState(tokens, operatorPrecedenceLevels, tokenIndex, expression)
+  assert(tokens, ERROR_NO_TOKENS)
 
   self.tokens = tokens
   self.currentToken = tokens[1]
   self.currentTokenIndex = 1
 
   self.operatorPrecedenceLevels = operatorPrecedenceLevels or DEFAULT_OPERATOR_PRECEDENCE_LEVELS
+  self.charStream = (type(expression) == "string" and stringToTable(expression)) or expression
 end
 
 --- Parses the given tokens, and returns the AST.
 -- @return <Table> expression The AST of the tokens.
 function ParserMethods:parse(noErrors)
-  assert(self.tokens, "No tokens to parse")
+  assert(self.tokens, ERROR_NO_TOKENS_TO_PARSE)
 
   local expression = self:parseExpression()
   local remainingToken = self.currentToken
   if remainingToken and not noErrors then
-    error("Invalid expression: unexpected token '" .. remainingToken.Value .. "'")
+    error(self:generateError(ERROR_EXPECTED_EOF:format(remainingToken.Value)))
   end
 
   return expression
@@ -240,8 +279,9 @@ local Parser = {}
 -- @param <Table> tokens The tokens to parse
 -- @param <Table?> operatorPrecedenceLevels=DEFAULT_OPERATOR_PRECEDENCE_LEVELS The operator precedence levels to use in the parser
 -- @param <Number?> tokenIndex=1 The index of the current token
+-- @param <String|Table ?> expression=nil The expression to show during an error (e.g unexpected operator, etc.)
 -- @return <Table> ParserInstance The Parser instance
-function Parser:new(tokens, operatorPrecedenceLevels, tokenIndex)
+function Parser:new(tokens, operatorPrecedenceLevels, tokenIndex, expression)
   local ParserInstance = {}
   if tokens then
     ParserInstance.tokens = tokens
@@ -249,6 +289,7 @@ function Parser:new(tokens, operatorPrecedenceLevels, tokenIndex)
     ParserInstance.currentToken = tokens[ParserInstance.currentTokenIndex]
   end
   ParserInstance.operatorPrecedenceLevels = operatorPrecedenceLevels or DEFAULT_OPERATOR_PRECEDENCE_LEVELS
+  ParserInstance.charStream = (type(expression) == "string" and stringToTable(expression)) or expression
 
   local function inheritModule(moduleName, moduleTable)
     for index, value in pairs(moduleTable) do

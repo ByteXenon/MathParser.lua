@@ -1,7 +1,7 @@
 --[[
   Name: Evaluator.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-01-11
+  Date: 2024-02-21
 --]]
 
 --* Imports *--
@@ -11,15 +11,15 @@ local insert = table.insert
 --* Constants *--
 local DEFAULT_OPERATOR_FUNCTIONS = {
   Unary = {
-    ["-"] = function(operandValue) return -operandValue end
+    ["-"] = function(operand) return -operand end
   },
   Binary = {
-    ["+"] = function(leftValue, rightValue) return leftValue + rightValue end,
-    ["-"] = function(leftValue, rightValue) return leftValue - rightValue end,
-    ["/"] = function(leftValue, rightValue) return leftValue / rightValue end,
-    ["*"] = function(leftValue, rightValue) return leftValue * rightValue end,
-    ["^"] = function(leftValue, rightValue) return leftValue ^ rightValue end,
-    ["%"] = function(leftValue, rightValue) return leftValue % rightValue end
+    ["+"] = function(left, right) return left + right end,
+    ["-"] = function(left, right) return left - right end,
+    ["/"] = function(left, right) return left / right end,
+    ["*"] = function(left, right) return left * right end,
+    ["^"] = function(left, right) return left ^ right end,
+    ["%"] = function(left, right) return left % right end
   }
 }
 
@@ -107,17 +107,18 @@ function EvaluatorMethods:evaluateNode(node)
   if nodeType == "Constant" then
     return tonumber(node.Value)
   elseif nodeType == "Variable" then
-    if not self.variables[node.Value] then
+    local variableValue = self.variables[node.Value]
+    if not variableValue then
       return error("Variable not found: " .. tostring(node.Value))
     end
-    return self.variables[node.Value]
+    return variableValue
   elseif nodeType == "Operator" or nodeType == "UnaryOperator" then
     return self:evaluateOperator(node)
   elseif nodeType == "FunctionCall" then
     return self:evaluateFunctionCall(node)
   end
 
-  return error("Invalid node type: " .. tostring(nodeType))
+  return error("Invalid node type: " .. tostring(nodeType) .. " ( You're not supposed to see this error message. )")
 end
 
 --// PUBLIC METHODS \\--

@@ -1,12 +1,15 @@
 --[[
   Name: Lexer.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-02-08
+  Date: 2024-02-21
 --]]
 
 --* Dependencies *--
 local Helpers = require("Helpers/Helpers")
 local TokenFactory = require("Lexer/TokenFactory")
+
+--* Constants *--
+local ERROR_SEPARATOR = "+------------------------------+"
 
 --* Imports *--
 local stringToTable = Helpers.stringToTable
@@ -55,6 +58,8 @@ local LexerMethods = {}
 
 --// PRIVATE METHODS \\--
 
+--/ Helper methods /--
+
 --- Gets the next character from the character stream.
 -- @param <Number?> n=1 The amount of characters to skip in order to get the next character.
 -- @return <String> char The next character.
@@ -71,14 +76,28 @@ function LexerMethods:consume(n)
   return self.curChar
 end
 
+--/ Error handling /--
+
 --- Generates an error message with a pointer to the current character.
 -- @param <String> message The error message.
+-- @param <Number?> positionAdjustment=0 The position adjustment to apply to the pointer.
 -- @return <String> errorMessage The error message with a pointer.
-function LexerMethods:generateError(message)
-  local pointer = rep(" ", self.curCharPos - 1) .. "^"
+function LexerMethods:generateErrorMessage(message, positionAdjustment)
+  local position = self.curCharPos + (positionAdjustment or 0)
+  local pointer = rep(" ", position - 1) .. "^"
   local errorMessage = "\n" .. concat(self.charStream) .. "\n" .. pointer .. "\n" .. message
   return errorMessage
 end
+
+--- Displays the error messages if there are any.
+function LexerMethods:displayErrors()
+  if #self.errors > 0 then
+    local errorMessage = concat(self.errors, "\n" .. ERROR_SEPARATOR)
+    error("Lexer errors:" .. "\n" .. ERROR_SEPARATOR .. errorMessage .. "\n" .. ERROR_SEPARATOR)
+  end
+end
+
+--/ Character checks /--
 
 --- Checks if the given character is a parenthesis.
 -- @param <String?> char=self.curChar The character to check.
@@ -120,14 +139,21 @@ function LexerMethods:isWhitespace(char)
   return char:match("%s")
 end
 
+--/ Token consumers /--
+
 --- Consumes the next hexadecimal number from the character stream.
 -- @param <Table> number The number character table to append the next number to.
 -- @return <Table> number The parsed hexadecimal number.
 function LexerMethods:consumeHexNumber(number)
-  insert(number, self:consume()) -- consume 'x' or 'X'
-  while self:peek():match("[%da-fA-F]") do
-    insert(number, self:consume())
+  insert(number, self:consume()) -- consume the '0'
+  local isHex = self:peek():match("[%da-fA-F]")
+  if not isHex then
+    insert(self.errors, self:generateErrorMessage("Expected a number after the 'x' or 'X'", 1))
   end
+  repeat
+    insert(number, self:consume())
+    isHex = self:peek():match("[%da-fA-F]")
+  until not isHex
   return number
 end
 
@@ -135,10 +161,15 @@ end
 -- @param <Table> number The number character table to append the next number to.
 -- @return <Tabel> number The parsed floating point number.
 function LexerMethods:consumeFloatNumber(number)
-  insert(number, self:consume())
-  while self:peek():match("[%d]") do
-    insert(number, self:consume())
+  insert(number, self:consume()) -- consume the digit before the decimal point
+  local isNumber = self:peek():match("[%d]")
+  if not isNumber then
+    insert(self.errors, self:generateErrorMessage("Expected a number after the decimal point", 1))
   end
+  repeat
+    insert(number, self:consume())
+    isNumber = self:peek():match("[%d]")
+  until not isNumber
   return number
 end
 
@@ -146,13 +177,21 @@ end
 -- @param <Table> number The number character table to append the next number to.
 -- @return <Table> number The parsed number in scientific notation
 function LexerMethods:consumeScientificNumber(number)
-  insert(number, self:consume()) -- consume 'e' or 'E'
+  insert(number, self:consume()) -- consume the digit before the exponent
+  -- An optional sign, default: +
   if self:peek():match("[+-]") then
-    insert(number, self:consume()) -- consume '+' or '-'
-  end
-  while self:peek():match("[%d]") do
+    -- consume the exponent sign, and insert the plus/minus sign
     insert(number, self:consume())
   end
+  local isNumber = self:peek():match("[%d]")
+  if not isNumber then
+    insert(self.errors, self:generateErrorMessage("Expected a number after the exponent", 1))
+  end
+
+  repeat
+    insert(number, self:consume())
+    isNumber = self:peek():match("[%d]")
+  until not isNumber
   return number
 end
 
@@ -205,14 +244,14 @@ function LexerMethods:consumeConstant()
   -- <number>
   if self:isNumber(self.curChar) then
     local newToken = self:consumeNumber()
-    return createConstantToken(newToken)
+    return createConstantToken(self, newToken)
   end
 
-  local errorMessage = self:generateError(
-    "Unexpected character: '" .. self.curChar
-    .. "', expected one of: {<whitespace>, <parentheses>, <comma>, <operator>, <number>}"
+  local errorMessage = self:generateErrorMessage(
+    "Invalid character detected: '" .. self.curChar
+    .. "'. Expected one of the following: a whitespace, a parenthesis, a comma, an operator, or a number."
   )
-  error(errorMessage)
+  insert(self.errors, errorMessage)
   return
 end
 
@@ -226,6 +265,7 @@ function LexerMethods:consumeOperator()
   local longestOperator = self.longestOperator
   local operator
 
+  -- Trie walker
   for index = 0, longestOperator - 1 do
     -- Use peek() instead of consume() to avoid backtracking
     local character = self:peek(index)
@@ -252,13 +292,13 @@ function LexerMethods:consumeToken()
     return
 
   elseif operator then
-    return createOperatorToken(operator)
+    return createOperatorToken(self, operator)
   elseif self:isParenthesis(curChar) then
-    return createParenthesesToken(curChar)
+    return createParenthesesToken(self, curChar)
   elseif self:isIdentifier(curChar) then
-    return createVariableToken(self:consumeIdentifier())
+    return createVariableToken(self, self:consumeIdentifier())
   elseif self:isComma(curChar) then
-    return createCommaToken()
+    return createCommaToken(self)
   else
     return self:consumeConstant()
   end
@@ -305,8 +345,11 @@ end
 --- Runs the lexer.
 -- @return <Table> tokens The tokens of the expression.
 function LexerMethods:run()
+  self.errors = {}
   assert(self.charStream, "No charStream given")
-  return self:consumeTokens()
+  local tokens = self:consumeTokens()
+  self:displayErrors()
+  return tokens
 end
 
 --* Lexer (Tokenizer) *--
@@ -326,6 +369,7 @@ function Lexer:new(expression, operators, charPos)
   end
   LexerInstance.operators = operators or DEFAULT_OPERATORS
   LexerInstance.operatorsTrie, LexerInstance.longestOperator = makeTrie(LexerInstance.operators)
+  LexerInstance.errors = {}
 
   local function inheritModule(moduleName, moduleTable)
     for index, value in pairs(moduleTable) do
