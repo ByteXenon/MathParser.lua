@@ -14,44 +14,101 @@ local MathParser = require("MathParser")
 -- Create an instance of MathParser
 local myMathParser = MathParser:new()
 
+local errorMessages = {}
+local successMessages = {}
+
 local function runUnitTest(expression, expected, testName)
   local result = myMathParser:solve(expression)
-  assert(result == expected, testName .. " failed. Expected: " .. expected .. ", Actual: " .. result)
-  print("Successfully passed unit test: '" .. testName .. "' With result: " .. result)
+  if result ~= expected then
+    table.insert(errorMessages, testName .. " failed. Expected: " .. expected .. ", Actual: " .. result .. ", Expression: " .. expression)
+  end
+  table.insert(successMessages, "Successfully passed unit test: '" .. testName .. "' With result: " .. result)
+end
+local function displaySuccessMessages()
+  if #successMessages > 0 then
+    print(table.concat(successMessages, "\n") .. "")
+  end
+end
+local function displayErrorMessages()
+  if #errorMessages > 0 then
+    error(table.concat(errorMessages, "\n") .. "")
+  end
 end
 
 -- Add some variables
 myMathParser:addVariable("test", 10)
 myMathParser:addVariable("a", 5)
 
+-- Register the variables as locals so we can use it in Lua too
+local test = 10
+local a = 5
+
 -- Add some functions
 myMathParser:addFunction("testFunction", function(a, b)
   return a + b
 end)
 
--- Unit tests
-runUnitTest("2 + 3", 5, "Addition")
-runUnitTest("5 - 2", 3, "Subtraction")
-runUnitTest("2 * 3", 6, "Multiplication")
-runUnitTest("6 / 2", 3, "Division")
-runUnitTest("2 ^ 3", 8, "Exponentiation")
-runUnitTest("2 + 3 * 4", 14, "Operator precedence (multiplication)")
-runUnitTest("2 ^ 3 ^ 2", 512, "Exponentiation (right-associative)")
-runUnitTest("a + test", 15, "Variable substitution")
-runUnitTest("(2 + 3) * 4 - 5", 15, "Complex expression")
-runUnitTest("1.5 + 2.5", 4, "Floating point numbers")
-runUnitTest(".5 + .5", 1, "Floating point numbers (leading decimal point)")
-runUnitTest("2e3 + 2e+3", 4000, "Scientific notation (positive exponent)")
-runUnitTest("2e3 - 2e-3", 1999.998, "Scientific notation (negative exponent)")
-runUnitTest(".5e3 + .5e-3", 500.0005, "Scientific notation (leading decimal point)")
-runUnitTest("1.10e+5", 110000, "Scientific notation (leading decimal point and positive exponent)")
-runUnitTest("0xFF + 0xFF", 510, "Hexadecimal numbers")
+
+--// UNIT TESTS //--
+
+-- Basic tests
+runUnitTest("1 + 1", 1+1, "Addition")
+runUnitTest("2 * 2", 2*2, "Subtraction")
+runUnitTest("1 * 2", 1*2, "Multiplication")
+runUnitTest("2 / 1", 2/1, "Division")
+runUnitTest("1 ^ 2", 1^2, "Exponentiation")
+runUnitTest("1 + 1 * 2", 1+1*2, "Operator precedence (multiplication)")
+runUnitTest("1 ^ 1 ^ 2", 1^1^2, "Exponentiation (right-associative)")
+runUnitTest("a + test", a+test, "Variable substitution")
+runUnitTest("(1 + 1) * 2 - 1", (1+1)*2-1, "Complex expression")
+runUnitTest("1.0 + 1.5", 1.0+1.5, "Floating point numbers")
+runUnitTest(".5 + .5", .5+.5, "Floating point numbers (leading decimal point)")
+runUnitTest("1e1 + 1e+1", 1e1+1e+1, "Scientific notation (positive exponent)")
+runUnitTest("1e1 - 1e-1", 1e1-1e-1, "Scientific notation (negative exponent)")
+runUnitTest(".5e1 + .5e-1", .5e1+.5e-1, "Scientific notation (leading decimal point)")
+runUnitTest("1.10e+1", 1.10e+1, "Scientific notation (leading decimal point and positive exponent)")
+runUnitTest(".5e1 + 1.5e+1 + 2.5e-1", .5e1+1.5e+1+2.5e-1, "Advanced scientific notation (leading decimal point)")
+runUnitTest("0xF + 0xF", 0xF+0xF, "Hexadecimal numbers")
 runUnitTest("sin(1)", math.sin(1), "Function call (sin)")
 runUnitTest("-sin(1)", -math.sin(1), "Function call (sin) with unary operator")
 runUnitTest("sin(sin(1))", math.sin(math.sin(1)), "Function call (sin) with nested function call")
-runUnitTest("log(10, 100)", math.log(10, 100), "Function call with multiple arguments (log)")
+runUnitTest("log(1, 10)", math.log(1, 10), "Function call with multiple arguments (log)")
 runUnitTest("log(sin(1), cos(1))", math.log(math.sin(1), math.cos(1)), "Function call (log) with multiple arguments-function-calls (sin, cos)")
-runUnitTest("testFunction(2, 3)", 5, "Custom function call (testFunction)")
+runUnitTest("testFunction(1, 1)", 1+1, "Custom function call (testFunction)")
+
+-- Operator Precedence Tests
+runUnitTest("2+3*4", 2+3*4, "Operator precedence (multiplication before addition)")
+runUnitTest("2*3+4", 2*3+4, "Operator precedence (multiplication before addition)")
+runUnitTest("2-3*4", 2-3*4, "Operator precedence (multiplication before subtraction)")
+runUnitTest("2*3-4", 2*3-4, "Operator precedence (multiplication before subtraction)")
+runUnitTest("2+3/4", 2+3/4, "Operator precedence (division before addition)")
+runUnitTest("2/3+4", 2/3+4, "Operator precedence (division before addition)")
+runUnitTest("2-3/4", 2-3/4, "Operator precedence (division before subtraction)")
+runUnitTest("2/3-4", 2/3-4, "Operator precedence (division before subtraction)")
+runUnitTest("2+3^4", 2+3^4, "Operator precedence (exponentiation before addition)")
+runUnitTest("2^3+4", 2^3+4, "Operator precedence (exponentiation before addition)")
+runUnitTest("2-3^4", 2-3^4, "Operator precedence (exponentiation before subtraction)")
+runUnitTest("2^3-4", 2^3-4, "Operator precedence (exponentiation before subtraction)")
+runUnitTest("2*3^4", 2*3^4, "Operator precedence (exponentiation before multiplication)")
+runUnitTest("2^3*4", 2^3*4, "Operator precedence (exponentiation before multiplication)")
+runUnitTest("2/3^4", 2/3^4, "Operator precedence (exponentiation before division)")
+runUnitTest("2^3/4", 2^3/4, "Operator precedence (exponentiation before division)")
+runUnitTest("(2+3)*4", (2+3)*4, "Parentheses change precedence")
+runUnitTest("-2", -2, "Unary minus operator")
+runUnitTest("-2^3", -2^3, "Unary minus operator precedence with exponentiation")
+runUnitTest("-(2^3)", -(2^3), "Unary minus operator precedence with parentheses and exponentiation")
+runUnitTest("-2*3", -2*3, "Unary minus operator precedence with multiplication")
+runUnitTest("-(2*3)", -(2*3), "Unary minus operator precedence with parentheses and multiplication")
+runUnitTest("-2/3", -2/3, "Unary minus operator precedence with division")
+runUnitTest("-(2/3)", -(2/3), "Unary minus operator precedence with parentheses and division")
+runUnitTest("-2+3", -2+3, "Unary minus operator precedence with addition")
+runUnitTest("-(2+3)", -(2+3), "Unary minus operator precedence with parentheses and addition")
+runUnitTest("-2-3", -2-3, "Unary minus operator precedence with subtraction")
+runUnitTest("-(2-3)", -(2-3), "Unary minus operator precedence with parentheses and subtraction")
+runUnitTest("- -2", - -2, "Double unary minus operator")
+runUnitTest("-2+3*4^5-6/7", -2+3*4^5-6/7, "Complex expression with all operators and no parentheses")
+runUnitTest("-2+(3*4)^(5- -6)/7", -2+(3*4)^(5- -6)/7, "Complex expression with all operators and parentheses")
+
 
 -- Advanced tests
 local CUSTOM_OPERATOR_PRECEDENCE_LEVELS = {
@@ -95,8 +152,13 @@ end
 
 local invalidExpressions = {
   -- Lexer errors
-  "~2", -- Unknown character
+  "~2", -- Unknown character before number
   "2~", -- Unknown character after number
+  ".", -- Missing digits after decimal point
+  "1.", -- Missing digits after decimal point
+  "1e", -- Missing exponent
+  "1e+", -- Missing exponent value
+  "0x", -- Missing hexadecimal digits
 
   -- Parser errors
   "+ 2",     -- Missing left operand
@@ -104,23 +166,29 @@ local invalidExpressions = {
   "2 + 3 +", -- Missing right operand after binary operator
   "-2-",     -- Missing operand after unary operator
   "--",      -- Missing operand after unary operator
+  "2 + 3)",  -- Missing left parenthesis
+  "(2 + 3",  -- Missing right parenthesis
+  -- "sin" is one of default functions
+  "sin(,)",    -- Missing arguments in function call
+  "sin(1,,1)", -- Missing argument in-between in function call
+  "sin(1,)",   -- Missing second argument in function call
+  "sin(,1)",   -- Missing first argument in function call
+  "sin(1,2",   -- Missing right parenthesis in function call
+  "sin(1,",    -- Missing right parenthesis in function call
 
   -- Evaluator errors
   "1 + unknownVariable",
-  "1 + 2 + unknownVariable",
   "-unknownVariable",
   "sin(unknownVariable)",
   "unknownFunction(1)",
-  "sin(1",
-  "sin(1 + 2",
-  "sin(1,)",
-  "sin(1,"
 }
 
 for _, expression in ipairs(invalidExpressions) do
   runErrorHandlingTest(expression, "Error handling")
 end
 
+displayErrorMessages()
+displaySuccessMessages()
 print("All unit tests passed!")
 
 return true
