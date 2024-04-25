@@ -2,7 +2,7 @@
 
 <img src="https://github.com/ByteXenon/MathParser.lua/assets/125568681/7c85601d-1218-414b-9545-f5e57d48c061" alt="MathParser.lua logo" width="200" height="200">
 
-# 🚀 MathParser.lua - A Robust Lua Math Parser
+# MathParser.lua - A Robust Lua Math Parser
 
 A comprehensive, user-friendly math parser for Lua, featuring support for variables, functions and customizable operators and operator precedence.
 
@@ -16,7 +16,7 @@ A comprehensive, user-friendly math parser for Lua, featuring support for variab
 
 </div>
 
-## 🎯 Introduction
+## Introduction
 
 Welcome to MathParser.lua, a comprehensive math parser tailored specifically for Lua. With its structured design and well-commented code, this parser is accessible to both newcomers and seasoned developers alike.
 
@@ -24,32 +24,32 @@ MathParser.lua is capable of handling a wide array of mathematical problems, pro
 
 One of the defining features of MathParser.lua is its thorough test coverage. We've ensured that every line of code is put through rigorous testing, guaranteeing its reliability and robustness. Furthermore, it's compatible with various Lua versions, starting from Lua-5.1, including LuaJIT. It's even compatible with Luau, making it a viable choice for your Roblox projects.
 
-## 📖 Table of Contents
+## Table of Contents
 
-- [🚀 MathParser.lua - A Robust Lua Math Parser](#-mathparserlua---a-robust-lua-math-parser)
-  - [🎯 Introduction](#-introduction)
-  - [📖 Table of Contents](#-table-of-contents)
-  - [🎁 Features](#-features)
-  - [🛠 Usage](#-usage)
-    - [🔰 Getting Started](#-getting-started)
-    - [🔱 Advanced Usage](#-advanced-usage)
-  - [🛣️ Roadmap](#️-roadmap)
-  - [📜 License](#-license)
+- [MathParser.lua - A Robust Lua Math Parser](#mathparserlua---a-robust-lua-math-parser)
+  - [Introduction](#introduction)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Usage](#usage)
+    - [Getting Started](#getting-started)
+    - [Advanced Usage](#advanced-usage)
+  - [Roadmap](#roadmap)
+  - [License](#license)
 
-**Quick Links:** [🔗 API](./src/MathParser.lua) | [📄 License](./LICENSE) | [📚 Documentation](./docs/Documentation.md) | [📝 Example](./example.lua)
+**Quick Links:** [API](./src/MathParser.lua) | [License](./LICENSE) | [Documentation](./docs/Documentation.md) | [Example](./example.lua)
 
-## 🎁 Features
+## Features
 
 1. **User-Friendly**: MathParser.lua boasts an intuitive API, making it a breeze to integrate into your projects. Its comprehensive documentation provides clear examples and explanations, while its error messages are designed to pinpoint the exact location of issues, reducing debugging time.
 2. **Safe and Secure**: Safety is a priority with MathParser.lua. It avoids the use of the `load` function, which can execute any Lua code. Instead, it employs a custom parser to process input expressions, ensuring only valid mathematical operations are executed. If an input is invalid or potentially harmful, MathParser.lua throws an error, providing detailed information about the issue.
 3. **Compact and Efficient**: MathParser.lua is a lean project with no external dependencies, making it easy to incorporate into your codebase. Its compact size doesn't compromise its functionality, offering a powerful tool that's easy to understand and modify.
 4. **Highly Customizable**: MathParser.lua offers extensive customization options. You can add custom functions, variables, and operators, and even change the order in which operations are done. This flexibility allows you to tailor MathParser.lua to your specific needs, making it a versatile tool for a wide range of applications.
 
-## 🛠 Usage
+## Usage
 
 MathParser.lua is a versatile tool that can handle everything from simple arithmetic to complex mathematical expressions. Whether you're integrating it into a large project or using it for quick calculations, here's a comprehensive guide to get you started.
 
-### 🔰 Getting Started
+### Getting Started
 
 Using MathParser.lua is as easy as 1-2-3. Here's a quick example to get you started:
 ```lua
@@ -70,7 +70,7 @@ print(myParser:solve("(x + 5) * 2")) -- Outputs: 20
 
 It was just a simple example. For more advanced usage, let's move on to the next section.
 
-### 🔱 Advanced Usage
+### Advanced Usage
 
 MathParser.lua is not just a simple math parser, it's a powerful tool that can be customized to suit your needs. It supports the addition of custom functions, variables, and operators, allowing you to extend its functionality beyond basic math operations. Let's use all these features to demonstrate how you can use MathParser.lua in more advanced scenarios.
 
@@ -113,12 +113,12 @@ print(myParser:solve("5 ^ 3")) -- Outputs: 0
 
 For more details, refer to the [documentation](docs/Documentation.md), the [API source](src/MathParser.lua), or the [full example usage file](./example.lua).
 
-## 🛣️ Roadmap
+## Roadmap
 
 MathParser.lua is just getting started. Here are some of the enhancements and features we're planning for future releases:
 
 - [ ] Introduce support for internal functions that can modify the evaluator's state at runtime. This includes setting variables and jumping to different parts of the expression.
-- [ ] Package MathParser.lua into a single file for easy distribution and usage. We also plan to make it available on LuaRocks and the project's GitHub releases.
+- [x] Package MathParser.lua into a single file for easy distribution and usage. We also plan to make it available on LuaRocks and the project's GitHub releases.
 - [ ] Implement full support for Luau to cater to the Roblox developer community.
 - [ ] Expand the mathematical function library to include advanced functions not available in the standard Lua math library, such as factorial, permutations, and combinations.
 - [ ] Incorporate support for complex numbers to handle more sophisticated mathematical problems.
@@ -128,6 +128,6 @@ MathParser.lua is just getting started. Here are some of the enhancements and fe
 
 We welcome feature requests and suggestions for improvements. Feel free to open an issue or a pull request. Your feedback is highly appreciated!
 
-## 📜 License
+## License
 
 MathParser.lua is (re)licensed under the [MIT License](LICENSE).
