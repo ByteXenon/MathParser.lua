@@ -2,9 +2,9 @@
 
 <img src="https://github.com/ByteXenon/MathParser.lua/assets/125568681/7c85601d-1218-414b-9545-f5e57d48c061" alt="MathParser.lua logo" width="200" height="200">
 
-# MathParser.lua - A Robust Lua Math Parser
+# MathParser.lua - A Customizable and Fast Lua Math Parser
 
-A comprehensive, user-friendly math parser for Lua, featuring support for variables, functions and customizable operators and operator precedence.
+A powerful and customizable Lua math parser that can solve both simple arithmetic problems and complex mathematical expressions. It supports adding variables, functions, custom operators, and operator precedence levels. It's designed to be safe, fast, and easy to use.
 
 ![Lua](https://img.shields.io/badge/Lua-5.1%2C%205.2%2C%205.3%2C%205.4-blue?style=for-the-badge&logo=lua)
 ![GitHub stars](https://img.shields.io/github/stars/ByteXenon/MathParser.lua?style=for-the-badge)
@@ -18,15 +18,13 @@ A comprehensive, user-friendly math parser for Lua, featuring support for variab
 
 ## Introduction
 
-Welcome to MathParser.lua, a comprehensive math parser tailored specifically for Lua. With its structured design and well-commented code, this parser is accessible to both newcomers and seasoned developers alike.
+MathParser.lua can solve many different types of math problems. It's a tool that can be used for solving [simple arithmetic problems](#getting-started), as well as [more complex mathematical expressions](#advanced-usage). It supports adding variables, functions, custom operators, and operator precedence levels (wiki: [Order of Operations](https://en.wikipedia.org/wiki/Order_of_operations)). It's also designed to be safe, so you can use it without worrying about security issues.
 
-MathParser.lua is capable of handling a wide array of mathematical problems, providing a reliable solution for your computational needs. But it doesn't stop there. It offers a high degree of customization, allowing you to extend its functionality by adding your own functions, variables, and operators. You even have the flexibility to alter the precedence of operations to suit your needs. For instance, you can configure the parser to prioritize addition over multiplication - a level of customization that truly sets MathParser.lua apart from other math parsers.
-
-One of the defining features of MathParser.lua is its thorough test coverage. We've ensured that every line of code is put through rigorous testing, guaranteeing its reliability and robustness. Furthermore, it's compatible with various Lua versions, starting from Lua-5.1, including LuaJIT. It's even compatible with Luau, making it a viable choice for your Roblox projects.
+For a deeper understanding of its usage and functionality, refer to the [documentation](docs/Documentation.md). It provides detailed explanations on how to use MathParser.lua and how it works.
 
 ## Table of Contents
 
-- [MathParser.lua - A Robust Lua Math Parser](#mathparserlua---a-robust-lua-math-parser)
+- [MathParser.lua - A Customizable and Fast Lua Math Parser](#mathparserlua---a-customizable-and-fast-lua-math-parser)
   - [Introduction](#introduction)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
@@ -34,24 +32,25 @@ One of the defining features of MathParser.lua is its thorough test coverage. We
     - [Getting Started](#getting-started)
     - [Advanced Usage](#advanced-usage)
   - [Roadmap](#roadmap)
+  - [Contact](#contact)
   - [License](#license)
 
 **Quick Links:** [API](./src/MathParser.lua) | [License](./LICENSE) | [Documentation](./docs/Documentation.md) | [Example](./example.lua)
 
 ## Features
 
-1. **User-Friendly**: MathParser.lua boasts an intuitive API, making it a breeze to integrate into your projects. Its comprehensive documentation provides clear examples and explanations, while its error messages are designed to pinpoint the exact location of issues, reducing debugging time.
-2. **Safe and Secure**: Safety is a priority with MathParser.lua. It avoids the use of the `load` function, which can execute any Lua code. Instead, it employs a custom parser to process input expressions, ensuring only valid mathematical operations are executed. If an input is invalid or potentially harmful, MathParser.lua throws an error, providing detailed information about the issue.
-3. **Compact and Efficient**: MathParser.lua is a lean project with no external dependencies, making it easy to incorporate into your codebase. Its compact size doesn't compromise its functionality, offering a powerful tool that's easy to understand and modify.
-4. **Highly Customizable**: MathParser.lua offers extensive customization options. You can add custom functions, variables, and operators, and even change the order in which operations are done. This flexibility allows you to tailor MathParser.lua to your specific needs, making it a versatile tool for a wide range of applications.
+1. **Easy to Use**: MathParser.lua is simple to use. It has a clear API and helpful documentation. If there's a problem, it gives you clear error messages to help you fix it quickly.
+2. **Safe**: MathParser.lua is designed to be safe. Unlike *other* math parsers written in Lua, it doesn't use `loadstring` or `load` to evaluate expressions. Instead, it uses a custom parser and evaluator that were built from scratch. This makes it safe to use in any environment.
+3. **Small and Fast**: MathParser.lua is a small project that doesn't need any other dependency to work.
+4. **Customizable**: You can change MathParser.lua to do exactly what you want. You can add your own functions, variables, and operators. You can even change the order of operations. This makes it a useful tool for many different projects.
 
 ## Usage
 
-MathParser.lua is a versatile tool that can handle everything from simple arithmetic to complex mathematical expressions. Whether you're integrating it into a large project or using it for quick calculations, here's a comprehensive guide to get you started.
+MathParser.lua is a tool that can handle everything from simple arithmetic to complex mathematical expressions. Whether you're integrating it into a large project or using it for quick calculations, here's a comprehensive guide to get you started.
 
 ### Getting Started
 
-Using MathParser.lua is as easy as 1-2-3. Here's a quick example to get you started:
+Using MathParser.lua is very easy. Here's a simple example to demonstrate how you can use it to solve basic math problems:
 ```lua
 local MathParser = require("MathParser")
 
@@ -127,6 +126,10 @@ MathParser.lua is just getting started. Here are some of the enhancements and fe
 - [ ] Add optional support for solving differential and integral equations.
 
 We welcome feature requests and suggestions for improvements. Feel free to open an issue or a pull request. Your feedback is highly appreciated!
+
+## Contact
+
+Do you have any questions, suggestions, or feedback? Feel free to open an issue on this GitHub repository. Alternatively, you can email the project maintainer, ByteXenon at `ddavi142(at)asu(dot)edu`
 
 ## License
 
