@@ -119,7 +119,7 @@ MathParser.lua is just getting started. Here are some of the enhancements and fe
 
 - [ ] Introduce support for internal functions that can modify the evaluator's state at runtime. This includes setting variables and jumping to different parts of the expression.
 - [x] Package MathParser.lua into a single file for easy distribution and usage. We also plan to make it available on LuaRocks and the project's GitHub releases.
-- [ ] Implement full support for Luau to cater to the Roblox developer community.
+- [x] Implement full support for Luau to cater to the Roblox developer community.
 - [ ] Expand the mathematical function library to include advanced functions not available in the standard Lua math library, such as factorial, permutations, and combinations.
 - [ ] Incorporate support for complex numbers to handle more sophisticated mathematical problems.
 - [ ] Optimize MathParser.lua further to enhance speed and reduce memory usage.
