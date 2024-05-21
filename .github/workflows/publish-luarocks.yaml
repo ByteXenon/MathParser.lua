@@ -17,6 +17,15 @@ jobs:
       with:
         luaVersion: "5.4.0"
 
+    - name: Install LuaRocks
+      run: |
+        wget https://luarocks.github.io/luarocks/releases/luarocks-3.11.0.tar.gz
+        tar zxpf luarocks-3.11.0.tar.gz
+        cd luarocks-3.11.0
+        ./configure; sudo make bootstrap
+        cd ..
+        rm -rf luarocks-3.11.0 luarocks-3.11.0.tar.gz
+
     - name: Delete old rockspec files
       run: |
         git rm MathParser-*.rockspec || true
