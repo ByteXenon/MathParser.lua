@@ -18,4 +18,6 @@ for version in "${lua_versions[@]}"; do
   fi
 done
 
+lua tests/speed.lua
+
 echo "All tests passed for all installed Lua versions"

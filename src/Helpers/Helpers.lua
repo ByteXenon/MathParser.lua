@@ -1,10 +1,12 @@
 --[[
   Name: Helpers.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-01-10
+  Date: 2024-05-21
 --]]
 
 --* Imports *--
+local char   = string.char
+local match  = string.match
 local gmatch = string.gmatch
 local insert = table.insert
 
@@ -33,6 +35,20 @@ function Helpers.stringToTable(string)
     insert(table, char)
   end
   return table
+end
+
+--- Converts a pattern to a character lookup table.
+-- @param <String> pattern The pattern to convert.
+-- @return <Table> table The table of characters.
+function Helpers.createPatternLookupTable(pattern)
+  local lookupTable = {}
+  for i = 0, 255 do
+    local character = char(i)
+    if match(character, pattern) then
+      lookupTable[character] = true
+    end
+  end
+  return lookupTable
 end
 
 return Helpers

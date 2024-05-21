@@ -1,7 +1,7 @@
 --[[
   Name: Parser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-02-21
+  Date: 2024-05-21
 --]]
 
 --* Dependencies *--
@@ -23,17 +23,17 @@ local createFunctionCallNode = NodeFactory.createFunctionCallNode
 --* Constants *--
 
 -- Error Messages --
-local ERROR_NO_TOKENS = "No tokens given"
-local ERROR_NO_TOKENS_TO_PARSE = "No tokens to parse"
-local ERROR_EXPECTED_EOF = "Expected EOF, got '%s'"
-local ERROR_UNEXPECTED_TOKEN = "Unexpected token: '%s' in <primary>, expected constant, variable or function call"
-local ERROR_EXPECTED_EXPRESSION = "Expected expression, got EOF"
-local ERROR_EXPECTED_CLOSING_PARENTHESIS = "Expected ')', got EOF"
+local ERROR_NO_TOKENS                             = "No tokens given"
+local ERROR_NO_TOKENS_TO_PARSE                    = "No tokens to parse"
+local ERROR_EXPECTED_EOF                          = "Expected EOF, got '%s'"
+local ERROR_UNEXPECTED_TOKEN                      = "Unexpected token: '%s' in <primary>, expected constant, variable or function call"
+local ERROR_EXPECTED_EXPRESSION                   = "Expected expression, got EOF"
+local ERROR_EXPECTED_CLOSING_PARENTHESIS          = "Expected ')', got EOF"
 local ERROR_EXPECTED_COMMA_OR_CLOSING_PARENTHESIS = "Expected ',' or ')', got '%s'"
-local ERROR_NO_CHARSTREAM = "<No charStream, error message: %s>"
+local ERROR_NO_CHARSTREAM                         = "<No charStream, error message: %s>"
 
 local DEFAULT_OPERATOR_PRECEDENCE_LEVELS = {
-  Unary = {    ["-"] = 4 },
+  Unary  = {   ["-"] = 4 },
   Binary = {   ["^"] = 3,
     ["*"] = 2, ["/"] = 2, ["%"] = 2,
     ["+"] = 1, ["-"] = 1 },
@@ -56,9 +56,11 @@ end
 -- @param <Number?> n=1 The amount of tokens to go ahead.
 -- @return <Table> currentToken The current token
 function ParserMethods:consume(n)
-  self.currentTokenIndex = self.currentTokenIndex + (n or 1)
-  self.currentToken = self.tokens[self.currentTokenIndex]
-  return self.currentToken
+  local newCurrentTokenIndex = self.currentTokenIndex + (n or 1)
+  local newCurrentToken      = self.tokens[newCurrentTokenIndex]
+  self.currentTokenIndex = newCurrentTokenIndex
+  self.currentToken      = newCurrentToken
+  return newCurrentToken
 end
 
 --- Checks if the given token is a binary operator.
@@ -129,8 +131,7 @@ end
 function ParserMethods:parseFunctionCall()
   -- <function call> ::= <variable> "(" <expression> ["," <expression>]* ")"
   local functionName = self.currentToken.Value
-  self:consume() -- Consume the variable (function name)
-  self:consume() -- Consume the opening parenthesis
+  self:consume(2) -- Consume the variable (function name) and the opening parenthesis
   local arguments = {}
   while true do
     local argument = self:parseExpression()
