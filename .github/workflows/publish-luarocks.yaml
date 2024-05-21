@@ -1,0 +1,30 @@
+name: LuaRocks Release
+on:
+  release:
+    types: [created]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up Lua
+      uses: leafo/gh-actions-lua@v8
+      with:
+        luaVersion: "5.4.0"
+    - name: Delete old rockspec files
+      run: |
+        git rm MathParser-*.rockspec || true
+    - name: Generate rockspec
+      run: |
+        lua generate_rockspec.lua ${GITHUB_REF#refs/tags/}
+    - name: Upload to LuaRocks
+      run: |
+        luarocks upload --api-key ${{ secrets.LUAROCKS_API_KEY }} MathParser-${GITHUB_REF#refs/tags/}.rockspec
+    - name: Add rockspec to repository
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add MathParser-${GITHUB_REF#refs/tags/}.rockspec
+        git commit -m "Add rockspec for version ${GITHUB_REF#refs/tags/}"
+        git push
