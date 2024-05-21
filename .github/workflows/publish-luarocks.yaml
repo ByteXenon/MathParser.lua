@@ -1,7 +1,7 @@
 name: LuaRocks Release
 on:
   release:
-    types: [created]
+    types: [created, published, edited]
 jobs:
   release:
     runs-on: ubuntu-latest
