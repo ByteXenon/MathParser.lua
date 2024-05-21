@@ -17,7 +17,7 @@ jobs:
         git rm MathParser-*.rockspec || true
     - name: Generate rockspec
       run: |
-        lua generate_rockspec.lua ${GITHUB_REF#refs/tags/}
+        lua build/generate_rockspec.lua ${GITHUB_REF#refs/tags/}
     - name: Upload to LuaRocks
       run: |
         luarocks upload --api-key ${{ secrets.LUAROCKS_API_KEY }} MathParser-${GITHUB_REF#refs/tags/}.rockspec
