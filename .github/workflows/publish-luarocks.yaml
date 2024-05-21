@@ -1,9 +1,8 @@
 name: LuaRocks Release
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
 
 jobs:
   release:
@@ -24,7 +23,7 @@ jobs:
 
     - name: Generate rockspec
       run: |
-        lua build/generate_rockspec.lua ${GITHUB_REF#refs/tags/}
+        sh build/generate_rockspec.sh ${GITHUB_REF#refs/tags/}
 
     - name: Upload to LuaRocks
       run: |
