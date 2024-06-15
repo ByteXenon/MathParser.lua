@@ -1,7 +1,7 @@
 --[[
   Name: Lexer.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-14
+  Date: 2024-06-15
 --]]
 
 --* Dependencies *--
@@ -26,6 +26,13 @@ local createCommaToken       = TokenFactory.createCommaToken
 
 --* Constants *--
 local ERROR_SEPARATOR = "+------------------------------+"
+
+local ERROR_NUMBER_AFTER_X             = "Expected a number after the 'x' or 'X'"
+local ERROR_NUMBER_AFTER_DECIMAL_POINT = "Expected a number after the decimal point"
+local ERROR_NUMBER_AFTER_EXPONENT_SIGN = "Expected a number after the exponent sign"
+local ERROR_INVALID_CHARACTER          = "Invalid character '%s'. Expected whitespace, parenthesis, comma, operator, or number."
+local ERROR_NO_CHAR_STREAM             = "No charStream given"
+
 local DEFAULT_OPERATORS = {"+", "-", "*", "/", "^", "%"}
 local DEFAULT_OPERATORS_TRIE, DEFAULT_LONGEST_OPERATOR = makeTrie(DEFAULT_OPERATORS)
 
@@ -104,7 +111,7 @@ function LexerMethods:consumeHexNumber(number)
   insert(number, self:consume()) -- consume the '0'
   local isHex = HEXADECIMAL_NUMBER_LOOKUP[self:peek()]
   if not isHex then
-    local generatedErrorMessage = self:generateErrorMessage("Expected a number after the 'x' or 'X'", 1)
+    local generatedErrorMessage = self:generateErrorMessage(ERROR_NUMBER_AFTER_X, 1)
     insert(self.errors, generatedErrorMessage)
   end
   repeat
@@ -121,7 +128,7 @@ function LexerMethods:consumeFloatNumber(number)
   insert(number, self:consume()) -- consume the digit before the decimal point
   local isNumber = NUMBER_LOOKUP[self:peek()]
   if not isNumber then
-    local generatedErrorMessage = self:generateErrorMessage("Expected a number after the decimal point", 1)
+    local generatedErrorMessage = self:generateErrorMessage(ERROR_NUMBER_AFTER_DECIMAL_POINT, 1)
     insert(self.errors, generatedErrorMessage)
   end
   repeat
@@ -143,7 +150,7 @@ function LexerMethods:consumeScientificNumber(number)
   end
   local isNumber = NUMBER_LOOKUP[self:peek()]
   if not isNumber then
-    local generatedErrorMessage = self:generateErrorMessage("Expected a number after the exponent sign", 1)
+    local generatedErrorMessage = self:generateErrorMessage(ERROR_NUMBER_AFTER_EXPONENT_SIGN, 1)
     insert(self.errors, generatedErrorMessage)
   end
 
@@ -208,10 +215,7 @@ function LexerMethods:consumeConstant()
     return createConstantToken(self, newToken)
   end
 
-  local errorMessage = self:generateErrorMessage(
-    "Invalid character detected: '" .. self.curChar
-    .. "'. Expected one of the following: a whitespace, a parenthesis, a comma, an operator, or a number."
-  )
+  local errorMessage = self:generateErrorMessage(ERROR_INVALID_CHARACTER:format(self.curChar))
   insert(self.errors, errorMessage)
   return
 end
@@ -293,7 +297,7 @@ end
 -- @param <Table> charStream The character stream to reset to.
 -- @param <Table?> operators=DEFAULT_OPERATORS The operators to reset to.
 function LexerMethods:resetToInitialState(charStream, operators)
-  assert(charStream, "No charStream given")
+  assert(charStream, ERROR_NO_CHAR_STREAM)
 
   -- If charStream is a string convert it to a table of characters
   self.charStream = (type(charStream) == "string" and stringToTable(charStream)) or charStream
@@ -307,7 +311,7 @@ end
 --- Runs the lexer.
 -- @return <Table> tokens The tokens of the expression.
 function LexerMethods:run()
-  assert(self.charStream, "No charStream given")
+  assert(self.charStream, ERROR_NO_CHAR_STREAM)
   self.errors = {}
   local tokens = self:consumeTokens()
 
