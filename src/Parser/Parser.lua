@@ -117,7 +117,7 @@ function ParserMethods:generateError(message, ...)
     return ERROR_NO_CHARSTREAM:format(message)
   end
 
-  local formattedMessage = message:format(...)
+  local message = message:format(...)
   local currentToken = self.currentToken
   local position = (not currentToken and #self.charStream + 1) or currentToken.Position
   local strippedExpressionTable = {}
