@@ -1,7 +1,7 @@
 --[[
   Name: MathParser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-04-25
+  Date: 2024-06-14
 --]]
 
 local scriptPath, requirePath, localPath, oldPath
@@ -15,9 +15,13 @@ if not LUAXEN_PACKER then
 end
 
 --* Dependencies *--
+local Helpers   = require("Helpers/Helpers")
 local Evaluator = require("Evaluator/Evaluator")
-local Lexer = require("Lexer/Lexer")
-local Parser = require("Parser/Parser")
+local Lexer     = require("Lexer/Lexer")
+local Parser    = require("Parser/Parser")
+
+--* Imports *--
+local inheritModule = Helpers.inheritModule
 
 --* MathParserMethods *--
 local MathParserMethods = {}
@@ -157,17 +161,8 @@ function MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, 
   MathParserInstance.Parser = Parser:new(nil, operatorPrecedenceLevels)
   MathParserInstance.Evaluator = Evaluator:new(nil, variables, operatorFunctions, functions)
 
-  local function inheritModule(moduleName, moduleTable)
-    for index, value in pairs(moduleTable) do
-      if MathParserInstance[index] then
-        return error("Conflicting names in " .. moduleName .. " and MathParserInstance: " .. index)
-      end
-      MathParserInstance[index] = value
-    end
-  end
-
   -- Main
-  inheritModule("MathParserMethods", MathParserMethods)
+  inheritModule("MathParserInstance", MathParserInstance, "MathParserMethods", MathParserMethods)
 
   return MathParserInstance
 end

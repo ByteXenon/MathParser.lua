@@ -12,6 +12,7 @@ local TokenFactory = require("Lexer/TokenFactory")
 local makeTrie                 = Helpers.makeTrie
 local stringToTable            = Helpers.stringToTable
 local createPatternLookupTable = Helpers.createPatternLookupTable
+local inheritModule            = Helpers.inheritModule
 
 local concat = table.concat
 local insert = table.insert
@@ -338,17 +339,8 @@ function Lexer:new(expression, operators, charPos)
     LexerInstance.operatorsTrie = DEFAULT_OPERATORS_TRIE
   end
 
-  local function inheritModule(moduleName, moduleTable)
-    for index, value in pairs(moduleTable) do
-      if LexerInstance[index] then
-        return error("Conflicting names in " .. moduleName .. " and LexerInstance: " .. index)
-      end
-      LexerInstance[index] = value
-    end
-  end
-
   -- Main
-  inheritModule("LexerMethods", LexerMethods)
+  inheritModule("LexerInstance", LexerInstance, "LexerMethods" , LexerMethods)
 
   return LexerInstance
 end

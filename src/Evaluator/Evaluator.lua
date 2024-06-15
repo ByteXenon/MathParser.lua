@@ -1,10 +1,15 @@
 --[[
   Name: Evaluator.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-05-21
+  Date: 2024-06-14
 --]]
 
+--* Dependencies *--
+local Helpers = require("Helpers/Helpers")
+
 --* Imports *--
+local inheritModule = Helpers.inheritModule
+
 local unpack = (unpack or table.unpack)
 local insert = table.insert
 
@@ -159,17 +164,8 @@ function Evaluator:new(expression, variables, operatorFunctions, functions)
   EvaluatorInstance.operatorFunctions = operatorFunctions or DEFAULT_OPERATOR_FUNCTIONS
   EvaluatorInstance.functions = functions or {}
 
-  local function inheritModule(moduleName, moduleTable)
-    for index, value in pairs(moduleTable) do
-      if EvaluatorInstance[index] then
-        return error("Conflicting names in " .. moduleName .. " and EvaluatorInstance: " .. index)
-      end
-      EvaluatorInstance[index] = value
-    end
-  end
-
   -- Main
-  inheritModule("EvaluatorMethods", EvaluatorMethods)
+  inheritModule("EvaluatorInstance", EvaluatorInstance, "EvaluatorMethods", EvaluatorMethods)
 
   return EvaluatorInstance
 end

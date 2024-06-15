@@ -1,7 +1,7 @@
 --[[
   Name: Parser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-05-21
+  Date: 2024-06-14
 --]]
 
 --* Dependencies *--
@@ -10,6 +10,8 @@ local NodeFactory = require("Parser/NodeFactory")
 
 --* Imports *--
 local stringToTable = Helpers.stringToTable
+local inheritModule = Helpers.inheritModule
+
 local insert = table.insert
 local concat = table.concat
 local max = math.max
@@ -292,17 +294,8 @@ function Parser:new(tokens, operatorPrecedenceLevels, tokenIndex, expression)
   ParserInstance.operatorPrecedenceLevels = operatorPrecedenceLevels or DEFAULT_OPERATOR_PRECEDENCE_LEVELS
   ParserInstance.charStream = (type(expression) == "string" and stringToTable(expression)) or expression
 
-  local function inheritModule(moduleName, moduleTable)
-    for index, value in pairs(moduleTable) do
-      if ParserInstance[index] then
-        return error("Conflicting names in " .. moduleName .. " and ParserInstance: " .. index)
-      end
-      ParserInstance[index] = value
-    end
-  end
-
   -- Main
-  inheritModule("ParserMethods", ParserMethods)
+  inheritModule("ParserInstance", ParserInstance, "ParserMethods", ParserMethods)
 
   return ParserInstance
 end
