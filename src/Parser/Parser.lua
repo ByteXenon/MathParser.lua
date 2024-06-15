@@ -1,7 +1,7 @@
 --[[
   Name: Parser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-14
+  Date: 2024-06-15
 --]]
 
 --* Dependencies *--
@@ -110,12 +110,14 @@ end
 
 --- Generate error message pointing to the current token.
 -- @param <String> message The error message.
-function ParserMethods:generateError(message)
+-- @param <...> ... The arguments to format the message with.
+function ParserMethods:generateError(message, ...)
   if not self.charStream then
     -- In case we don't have the charStream, we can't generate a proper error message
     return ERROR_NO_CHARSTREAM:format(message)
   end
 
+  local formattedMessage = message:format(...)
   local currentToken = self.currentToken
   local position = (not currentToken and #self.charStream + 1) or currentToken.Position
   local strippedExpressionTable = {}
@@ -153,7 +155,7 @@ function ParserMethods:parseFunctionCall()
       self:consume() -- Consume the comma
     else -- Unexpected token
       -- Is it even possible to reach this?
-      error(self:generateError(ERROR_EXPECTED_COMMA_OR_CLOSING_PARENTHESIS:format(currentToken.Value)))
+      error(self:generateError(ERROR_EXPECTED_COMMA_OR_CLOSING_PARENTHESIS, currentToken.Value))
     end
   end
   self:consume() -- Consume the closing parenthesis
@@ -235,7 +237,7 @@ function ParserMethods:parsePrimaryExpression()
     return token
   end
 
-  error(self:generateError(ERROR_UNEXPECTED_TOKEN:format(value)))
+  error(self:generateError(ERROR_UNEXPECTED_TOKEN, value))
 end
 
 --- Parses the expression.
@@ -269,7 +271,7 @@ function ParserMethods:parse(noErrors)
   local expression = self:parseExpression()
   local remainingToken = self.currentToken
   if remainingToken and not noErrors then
-    error(self:generateError(ERROR_EXPECTED_EOF:format(remainingToken.Value)))
+    error(self:generateError(ERROR_EXPECTED_EOF, remainingToken.Value))
   end
 
   return expression
