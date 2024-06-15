@@ -8,9 +8,6 @@
 local Helpers = require("Helpers/Helpers")
 local TokenFactory = require("Lexer/TokenFactory")
 
---* Constants *--
-local ERROR_SEPARATOR = "+------------------------------+"
-
 --* Imports *--
 local makeTrie                 = Helpers.makeTrie
 local stringToTable            = Helpers.stringToTable
@@ -27,6 +24,7 @@ local createOperatorToken    = TokenFactory.createOperatorToken
 local createCommaToken       = TokenFactory.createCommaToken
 
 --* Constants *--
+local ERROR_SEPARATOR = "+------------------------------+"
 local DEFAULT_OPERATORS = {"+", "-", "*", "/", "^", "%"}
 local DEFAULT_OPERATORS_TRIE, DEFAULT_LONGEST_OPERATOR = makeTrie(DEFAULT_OPERATORS)
 
