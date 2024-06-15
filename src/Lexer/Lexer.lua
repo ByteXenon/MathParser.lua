@@ -219,9 +219,9 @@ end
 --- Consumes the next operator from the character stream.
 -- @return <Table> operatorToken The next operator token.
 function LexerMethods:consumeOperator()
-  local node            = self.operatorsTrie
-  local charStream      = self.charStream
-  local curCharPos      = self.curCharPos
+  local node       = self.operatorsTrie
+  local charStream = self.charStream
+  local curCharPos = self.curCharPos
   local operator
 
   -- Trie walker
@@ -297,11 +297,11 @@ function LexerMethods:resetToInitialState(charStream, operators)
 
   -- If charStream is a string convert it to a table of characters
   self.charStream = (type(charStream) == "string" and stringToTable(charStream)) or charStream
-  self.curChar = (self.charStream[1]) or "\0"
+  self.curChar    = (self.charStream[1]) or "\0"
   self.curCharPos = 1
 
+  self.operatorsTrie = (operators and makeTrie(operators)) or DEFAULT_OPERATORS_TRIE
   self.operators = operators or DEFAULT_OPERATORS
-  self.operatorsTrie = makeTrie(self.operators)
 end
 
 --- Runs the lexer.
@@ -331,13 +331,10 @@ function Lexer:new(expression, operators, charPos)
     LexerInstance.curChar = (LexerInstance.charStream[charPos or 1]) or "\0"
     LexerInstance.curCharPos = charPos or 1
   end
-  if operators then
-    LexerInstance.operators = operators
-    LexerInstance.operatorsTrie = makeTrie(operators)
-  else
-    LexerInstance.operators = DEFAULT_OPERATORS
-    LexerInstance.operatorsTrie = DEFAULT_OPERATORS_TRIE
-  end
+  local operatorTrie = (operators and makeTrie(operators)) or DEFAULT_OPERATORS_TRIE
+  local operators    = operators or DEFAULT_OPERATORS
+  LexerInstance.operators = operators
+  LexerInstance.operatorsTrie = operatorTrie
 
   -- Main
   inheritModule("LexerInstance", LexerInstance, "LexerMethods" , LexerMethods)
