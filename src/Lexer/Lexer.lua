@@ -33,8 +33,8 @@ local ERROR_NUMBER_AFTER_EXPONENT_SIGN = "Expected a number after the exponent s
 local ERROR_INVALID_CHARACTER          = "Invalid character '%s'. Expected whitespace, parenthesis, comma, operator, or number."
 local ERROR_NO_CHAR_STREAM             = "No charStream given"
 
-local DEFAULT_OPERATORS = {"+", "-", "*", "/", "^", "%"}
-local DEFAULT_OPERATORS_TRIE, DEFAULT_LONGEST_OPERATOR = makeTrie(DEFAULT_OPERATORS)
+local DEFAULT_OPERATORS      = {"+", "-", "*", "/", "^", "%"}
+local DEFAULT_OPERATORS_TRIE = makeTrie(DEFAULT_OPERATORS)
 
 local WHITESPACE_LOOKUP              = createPatternLookupTable("%s")
 local NUMBER_LOOKUP                  = createPatternLookupTable("%d")
@@ -164,10 +164,10 @@ end
 --- Consumes the next number from the character stream.
 -- @return <String> number The next number.
 function LexerMethods:consumeNumber()
-  local number = { self.curChar }
-  local isFloat = false
+  local number       = { self.curChar }
+  local isFloat      = false
   local isScientific = false
-  local isHex = false
+  local isHex        = false
 
   -- Check for hexadecimal numbers
   if self.curChar == '0' and HEXADECIMAL_X_LOOKUP[self:peek()] then
@@ -231,13 +231,11 @@ function LexerMethods:consumeOperator()
   -- Trie walker
   local index = 0
   while true do
-    -- Use raw charStream instead of methods for optimization
+    -- Use raw charStream instead of self:peek() for performance reasons
     local character = charStream[curCharPos + index]
     node = node[character] -- Advance to the deeper node
     if not node then break end
-    if node.value then
-      operator = node.value
-    end
+    operator = node.value
     index = index + 1
   end
   if operator then
@@ -279,7 +277,7 @@ function LexerMethods:consumeTokens()
   local curChar = self.curChar
   while curChar ~= "\0" do
     local newToken = self:consumeToken()
-    -- Since whitespaces return nothing, we have to check if the token is not nil to insert it.
+    -- Since whitespaces returns nothing, we have to check if the token is not nil to insert it.
     if newToken then
       tokensLen = tokensLen + 1
       tokens[tokensLen] = newToken
@@ -305,7 +303,7 @@ function LexerMethods:resetToInitialState(charStream, operators)
   self.curCharPos = 1
 
   self.operatorsTrie = (operators and makeTrie(operators)) or DEFAULT_OPERATORS_TRIE
-  self.operators = operators or DEFAULT_OPERATORS
+  self.operators     = operators or DEFAULT_OPERATORS
 end
 
 --- Runs the lexer.
@@ -332,12 +330,12 @@ function Lexer:new(expression, operators, charPos)
   LexerInstance.errors = {}
   if expression then
     LexerInstance.charStream = (type(expression) == "string" and stringToTable(expression)) or expression
-    LexerInstance.curChar = (LexerInstance.charStream[charPos or 1]) or "\0"
+    LexerInstance.curChar    = (LexerInstance.charStream[charPos or 1]) or "\0"
     LexerInstance.curCharPos = charPos or 1
   end
   local operatorTrie = (operators and makeTrie(operators)) or DEFAULT_OPERATORS_TRIE
   local operators    = operators or DEFAULT_OPERATORS
-  LexerInstance.operators = operators
+  LexerInstance.operators     = operators
   LexerInstance.operatorsTrie = operatorTrie
 
   -- Main
