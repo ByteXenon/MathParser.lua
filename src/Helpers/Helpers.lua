@@ -54,16 +54,10 @@ end
 --- Creates a trie from the given operators, it's used to support 2+ character (potentional) operators.
 -- @param <Table> table The operators to create the trie from.
 -- @return <Table> trieTable The trie table.
--- @return <Number> longestElement The length of the longest operator.
 function Helpers.makeTrie(table)
   local trieTable = {}
-  local longestElement = 0
 
   for _, op in ipairs(table) do
-    if #op > longestElement then
-      longestElement = #op
-    end
-
     local node = trieTable
     for index = 1, #op do
       local character = op:sub(index, index)
@@ -72,7 +66,7 @@ function Helpers.makeTrie(table)
     end
     node.value = op
   end
-  return trieTable, longestElement
+  return trieTable
 end
 
 return Helpers

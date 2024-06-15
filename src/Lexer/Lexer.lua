@@ -219,13 +219,13 @@ end
 -- @return <Table> operatorToken The next operator token.
 function LexerMethods:consumeOperator()
   local node            = self.operatorsTrie
-  local longestOperator = self.longestOperator
   local charStream      = self.charStream
   local curCharPos      = self.curCharPos
   local operator
 
   -- Trie walker
-  for index = 0, longestOperator - 1 do
+  local index = 0
+  while true do
     -- Use raw charStream instead of methods for optimization
     local character = charStream[curCharPos + index]
     node = node[character] -- Advance to the deeper node
@@ -233,6 +233,7 @@ function LexerMethods:consumeOperator()
     if node.value then
       operator = node.value
     end
+    index = index + 1
   end
   if operator then
     self:consume(#operator - 1)
@@ -299,7 +300,7 @@ function LexerMethods:resetToInitialState(charStream, operators)
   self.curCharPos = 1
 
   self.operators = operators or DEFAULT_OPERATORS
-  self.operatorsTrie, self.longestOperator = makeTrie(self.operators)
+  self.operatorsTrie = makeTrie(self.operators)
 end
 
 --- Runs the lexer.
@@ -331,11 +332,10 @@ function Lexer:new(expression, operators, charPos)
   end
   if operators then
     LexerInstance.operators = operators
-    LexerInstance.operatorsTrie, LexerInstance.longestOperator = makeTrie(operators)
+    LexerInstance.operatorsTrie = makeTrie(operators)
   else
     LexerInstance.operators = DEFAULT_OPERATORS
     LexerInstance.operatorsTrie = DEFAULT_OPERATORS_TRIE
-    LexerInstance.longestOperator = DEFAULT_LONGEST_OPERATOR
   end
 
   local function inheritModule(moduleName, moduleTable)
