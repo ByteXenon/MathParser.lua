@@ -1,7 +1,7 @@
 --[[
   Name: Lexer.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-05-21
+  Date: 2024-06-14
 --]]
 
 --* Dependencies *--
@@ -12,6 +12,7 @@ local TokenFactory = require("Lexer/TokenFactory")
 local ERROR_SEPARATOR = "+------------------------------+"
 
 --* Imports *--
+local makeTrie                 = Helpers.makeTrie
 local stringToTable            = Helpers.stringToTable
 local createPatternLookupTable = Helpers.createPatternLookupTable
 
@@ -24,32 +25,6 @@ local createVariableToken    = TokenFactory.createVariableToken
 local createParenthesesToken = TokenFactory.createParenthesesToken
 local createOperatorToken    = TokenFactory.createOperatorToken
 local createCommaToken       = TokenFactory.createCommaToken
-
---* Local functions *--
-
---- Creates a trie from the given operators, it's used to support 2+ character (potentional) operators.
--- @param <Table> table The operators to create the trie from.
--- @return <Table> trieTable The trie table.
--- @return <Number> longestElement The length of the longest operator.
-local function makeTrie(table)
-  local trieTable = {}
-  local longestElement = 0
-
-  for _, op in ipairs(table) do
-    if #op > longestElement then
-      longestElement = #op
-    end
-
-    local node = trieTable
-    for index = 1, #op do
-      local character = op:sub(index, index)
-      node[character] = node[character] or {}
-      node = node[character]
-    end
-    node.value = op
-  end
-  return trieTable, longestElement
-end
 
 --* Constants *--
 local DEFAULT_OPERATORS = {"+", "-", "*", "/", "^", "%"}

@@ -1,7 +1,7 @@
 --[[
   Name: Helpers.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-05-21
+  Date: 2024-06-14
 --]]
 
 --* Imports *--
@@ -49,6 +49,30 @@ function Helpers.createPatternLookupTable(pattern)
     end
   end
   return lookupTable
+end
+
+--- Creates a trie from the given operators, it's used to support 2+ character (potentional) operators.
+-- @param <Table> table The operators to create the trie from.
+-- @return <Table> trieTable The trie table.
+-- @return <Number> longestElement The length of the longest operator.
+function Helpers.makeTrie(table)
+  local trieTable = {}
+  local longestElement = 0
+
+  for _, op in ipairs(table) do
+    if #op > longestElement then
+      longestElement = #op
+    end
+
+    local node = trieTable
+    for index = 1, #op do
+      local character = op:sub(index, index)
+      node[character] = node[character] or {}
+      node = node[character]
+    end
+    node.value = op
+  end
+  return trieTable, longestElement
 end
 
 return Helpers
