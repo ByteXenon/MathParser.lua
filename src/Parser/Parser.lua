@@ -1,11 +1,11 @@
 --[[
   Name: Parser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-15
+  Date: 2024-06-17
 --]]
 
 --* Dependencies *--
-local Helpers = require("Helpers/Helpers")
+local Helpers     = require("Helpers/Helpers")
 local NodeFactory = require("Parser/NodeFactory")
 
 --* Imports *--
@@ -14,13 +14,13 @@ local inheritModule = Helpers.inheritModule
 
 local insert = table.insert
 local concat = table.concat
-local max = math.max
-local min = math.min
-local rep = string.rep
+local max    = math.max
+local min    = math.min
+local rep    = string.rep
 
 local createUnaryOperatorNode = NodeFactory.createUnaryOperatorNode
-local createOperatorNode = NodeFactory.createOperatorNode
-local createFunctionCallNode = NodeFactory.createFunctionCallNode
+local createOperatorNode      = NodeFactory.createOperatorNode
+local createFunctionCallNode  = NodeFactory.createFunctionCallNode
 
 --* Constants *--
 

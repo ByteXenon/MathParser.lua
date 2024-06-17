@@ -1,11 +1,11 @@
 --[[
   Name: Lexer.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-15
+  Date: 2024-06-17
 --]]
 
 --* Dependencies *--
-local Helpers = require("Helpers/Helpers")
+local Helpers      = require("Helpers/Helpers")
 local TokenFactory = require("Lexer/TokenFactory")
 
 --* Imports *--
@@ -16,7 +16,7 @@ local inheritModule            = Helpers.inheritModule
 
 local concat = table.concat
 local insert = table.insert
-local rep = string.rep
+local rep    = string.rep
 
 local createConstantToken    = TokenFactory.createConstantToken
 local createVariableToken    = TokenFactory.createVariableToken
