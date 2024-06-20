@@ -225,7 +225,7 @@ local function Lexer(expression, operators, charPos)
     -- <number>
     if isNumber(curChar) then
       local newToken = consumeNumber()
-      return createConstantToken(newToken)
+      return createConstantToken(newToken, curCharPos)
     end
 
     local errorMessage = generateErrorMessage(ERROR_INVALID_CHARACTER:format(curChar))
@@ -267,15 +267,15 @@ local function Lexer(expression, operators, charPos)
       -- Return nothing, so the token gets ignored and skipped
       return
     elseif PARENTHESIS_LOOKUP[curChar] then
-      return createParenthesesToken(curChar)
+      return createParenthesesToken(curChar, curCharPos)
     elseif IDENTIFIER_LOOKUP[curChar] then
-      return createVariableToken(consumeIdentifier())
+      return createVariableToken(consumeIdentifier(), curCharPos)
     elseif curChar == "," then
-      return createCommaToken()
+      return createCommaToken(curCharPos)
     else
       local operator = consumeOperator()
       if operator then
-        return createOperatorToken(operator)
+        return createOperatorToken(operator, curCharPos)
       end
       return consumeConstant()
     end
