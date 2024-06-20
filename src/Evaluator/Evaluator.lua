@@ -1,7 +1,7 @@
 --[[
   Name: Evaluator.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-17
+  Date: 2024-06-20
 --]]
 
 --* Dependencies *--
@@ -140,16 +140,17 @@ local function Evaluator(expression, variables, operatorFunctions, functions)
   --// PUBLIC METHODS \\--
 
   --- Resets the evaluator to its initial state.
-  -- @param <Table> expression The expression to evaluate.
-  -- @param <Table?> variables={} The variables to use in the evaluator.
-  -- @param <Table?> operatorFunctions=DEFAULT_OPERATOR_FUNCTIONS The operator functions to evaluate in the evaluator.
-  local function resetToInitialState(expression, variables, operatorFunctions, functions)
+  -- @param <Table> givenExpression The expression to evaluate.
+  -- @param <Table?> givenVariables={} The variables to use in the evaluator.
+  -- @param <Table?> givenOperatorFunctions=DEFAULT_OPERATOR_FUNCTIONS The operator functions to evaluate in the evaluator.
+  -- @param <Table?> givenFunctions=DEFAULT_FUNCTIONS The functions to evaluate in the evaluator.
+  local function resetToInitialState(givenExpression, givenVariables, givenOperatorFunctions. givenFunctions)
     assert(expression, "No expression given")
 
-    expression = expression
-    variables = variables or {}
-    operatorFunctions = operatorFunctions or DEFAULT_OPERATOR_FUNCTIONS
-    functions = functions or DEFAULT_FUNCTIONS
+    expression = givenExpression
+    variables = givenVariables or {}
+    operatorFunctions = givenOperatorFunctions or DEFAULT_OPERATOR_FUNCTIONS
+    functions = givenFunctions or DEFAULT_FUNCTIONS
   end
 
   --- Evaluates the given expression.
