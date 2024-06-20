@@ -130,6 +130,12 @@ function MathParserMethods:setFunctions(functions)
   self.functions = functions
 end
 
+--- Resets MathParser's caches.
+function MathParserMethods:resetCaches()
+  self.cachedTokens = {}
+  self.cachedASTs   = {}
+end
+
 --- Resets the MathParser to its initial state.
 -- @param <Table> operatorPrecedenceLevels The operator precedence levels to use in the parser.
 -- @param <Table> variables The variables to use in the evaluator.
@@ -142,6 +148,9 @@ function MathParserMethods:resetToInitialState(operatorPrecedenceLevels, variabl
   self.operatorFunctions = operatorFunctions
   self.operators = operators
   self.functions = functions
+
+  self.cachedTokens = {}
+  self.cachedASTs = {}
 end
 
 --* MathParser *--
