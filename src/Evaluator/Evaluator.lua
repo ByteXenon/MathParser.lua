@@ -8,8 +8,6 @@
 local Helpers = require("Helpers/Helpers")
 
 --* Imports *--
-local inheritModule = Helpers.inheritModule
-
 local unpack = (unpack or table.unpack)
 local insert = table.insert
 

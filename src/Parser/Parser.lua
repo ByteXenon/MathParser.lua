@@ -10,7 +10,6 @@ local NodeFactory = require("Parser/NodeFactory")
 
 --* Imports *--
 local stringToTable = Helpers.stringToTable
-local inheritModule = Helpers.inheritModule
 
 local insert = table.insert
 local concat = table.concat
