@@ -303,18 +303,18 @@ local function Lexer(expression, operators, charPos)
   --// PUBLIC METHODS \\--
 
   --- Resets the lexer to its initial state.
-  -- @param <Table> charStream The character stream to reset to.
-  -- @param <Table?> operators=DEFAULT_OPERATORS The operators to reset to.
-  local function resetToInitialState(charStream, operators)
-    assert(charStream, ERROR_NO_CHAR_STREAM)
+  -- @param <Table> givenCharStream The character stream to reset to.
+  -- @param <Table?> givenOperators=DEFAULT_OPERATORS The operators to reset to.
+  local function resetToInitialState(givenCharStream, givenOperators)
+    assert(givenCharStream, ERROR_NO_CHAR_STREAM)
 
     -- If charStream is a string convert it to a table of characters
-    charStream = (type(charStream) == "string" and stringToTable(charStream)) or charStream
+    charStream = (type(givenCharStream) == "string" and stringToTable(givenCharStream)) or givenCharStream
     curChar    = (charStream[1]) or "\0"
     curCharPos = 1
 
-    operatorsTrie = (operators and makeTrie(operators)) or DEFAULT_OPERATORS_TRIE
-    operators     = operators or DEFAULT_OPERATORS
+    operatorsTrie = (givenOperators and makeTrie(givenOperators)) or DEFAULT_OPERATORS_TRIE
+    operators     = givenOperators or DEFAULT_OPERATORS
   end
 
   --- Runs the lexer.
