@@ -60,7 +60,7 @@ local function Parser(tokens, operatorPrecedenceLevels, tokenIndex, expression)
     currentToken = tokens[currentTokenIndex]
   end
   local operatorPrecedenceLevels = operatorPrecedenceLevels or DEFAULT_OPERATOR_PRECEDENCE_LEVELS
-  local charStream = (type(expression) == "string" and stringToTable(expression)) or expression
+  local expression               = expression
 
   --- Get the next token from the token stream. N is the amount of tokens to skip.
   -- @param <Number?> n=1 The amount of tokens to skip in order to get the next token.
@@ -126,13 +126,14 @@ local function Parser(tokens, operatorPrecedenceLevels, tokenIndex, expression)
   -- @param <String> message The error message.
   -- @param <...> ... The arguments to format the message with.
   local function generateError(message, ...)
-    if not charStream then
+    if not expression then
       -- In case we don't have the charStream, we can't generate a proper error message
       return ERROR_NO_CHARSTREAM:format(message)
     end
 
-    local message = message:format(...)
-    local position = (not currentToken and #charStream + 1) or currentToken.Position
+    local charStream = stringToTable(expression)
+    local message    = message:format(...)
+    local position   = (not currentToken and #charStream + 1) or currentToken.Position
     local strippedExpressionTable = {}
     for index = max(1, position - CONTEXT_CHAR_RANGE), min(position + CONTEXT_CHAR_RANGE, #charStream) do
       insert(strippedExpressionTable, charStream[index])
@@ -271,7 +272,7 @@ local function Parser(tokens, operatorPrecedenceLevels, tokenIndex, expression)
     currentToken = givenTokens[currentTokenIndex]
 
     operatorPrecedenceLevels = givenOperatorPrecedenceLevels or DEFAULT_OPERATOR_PRECEDENCE_LEVELS
-    charStream = (type(givenExpression) == "string" and stringToTable(givenExpression)) or givenExpression
+    expression               = givenExpression
   end
 
   --- Parses the given tokens, and returns the AST.
