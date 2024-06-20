@@ -48,7 +48,7 @@ local PARENTHESIS_LOOKUP             = createPatternLookupTable("[()]")
 
 --* Lexer *--
 --- @class Creates a new Lexer.
--- @param <String|Table> expression The expression to tokenize.
+-- @param <String?> expression The expression to tokenize.
 -- @param <Table?> operators=DEFAULT_OPERATORS The operators to use.
 -- @param <Number?> charPos=1 The character position to start at.
 -- @return <Table> LexerInstance The Lexer instance.
@@ -56,7 +56,7 @@ local function Lexer(expression, operators, charPos)
   local errors = {}
   local charStream, curChar, curCharPos
   if expression then
-    charStream = (type(expression) == "string" and stringToTable(expression)) or expression
+    charStream = stringToTable(expression)
     curChar    = (charStream[charPos or 1]) or "\0"
     curCharPos = charPos or 1
   end
@@ -303,15 +303,15 @@ local function Lexer(expression, operators, charPos)
   --// PUBLIC METHODS \\--
 
   --- Resets the lexer to its initial state.
-  -- @param <Table> givenCharStream The character stream to reset to.
+  -- @param <String?> expression The character stream to reset to.
   -- @param <Table?> givenOperators=DEFAULT_OPERATORS The operators to reset to.
-  local function resetToInitialState(givenCharStream, givenOperators)
-    assert(givenCharStream, ERROR_NO_CHAR_STREAM)
-
+  local function resetToInitialState(expression, givenOperators)
     -- If charStream is a string convert it to a table of characters
-    charStream = (type(givenCharStream) == "string" and stringToTable(givenCharStream)) or givenCharStream
-    curChar    = (charStream[1]) or "\0"
-    curCharPos = 1
+    if expression then
+      charStream = stringToTable(expression)
+      curChar    = charStream[1] or "\0"
+      curCharPos = 1
+    end
 
     operatorsTrie = (givenOperators and makeTrie(givenOperators)) or DEFAULT_OPERATORS_TRIE
     operators     = givenOperators or DEFAULT_OPERATORS
