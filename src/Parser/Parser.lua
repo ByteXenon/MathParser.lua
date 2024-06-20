@@ -23,6 +23,7 @@ local createOperatorNode      = NodeFactory.createOperatorNode
 local createFunctionCallNode  = NodeFactory.createFunctionCallNode
 
 --* Constants *--
+local CONTEXT_CHAR_RANGE = 20 -- The amount of characters to show around the error
 
 -- Error Messages --
 local ERROR_NO_TOKENS                             = "No tokens given"
@@ -133,7 +134,7 @@ local function Parser(tokens, operatorPrecedenceLevels, tokenIndex, expression)
     local message = message:format(...)
     local position = (not currentToken and #charStream + 1) or currentToken.Position
     local strippedExpressionTable = {}
-    for index = max(1, position - 20), min(position + 20, #charStream) do
+    for index = max(1, position - CONTEXT_CHAR_RANGE), min(position + CONTEXT_CHAR_RANGE, #charStream) do
       insert(strippedExpressionTable, charStream[index])
     end
     local strippedExpression = table.concat(strippedExpressionTable)
