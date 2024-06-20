@@ -1,7 +1,7 @@
 --[[
   Name: MathParser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-14
+  Date: 2024-06-20
 --]]
 
 local scriptPath, requirePath, localPath, oldPath
@@ -30,8 +30,8 @@ local MathParserMethods = {}
 -- @param <String> expression The expression to tokenize.
 -- @return <Table> tokens The tokens of the expression.
 function MathParserMethods:tokenize(expression)
-  self.Lexer:resetToInitialState(expression, self.operators)
-  local tokens = self.Lexer:run()
+  self.Lexer.resetToInitialState(expression, self.operators)
+  local tokens = self.Lexer.run()
   return tokens
 end
 
@@ -39,8 +39,8 @@ end
 -- @param <Table> tokens The tokens to parse.
 -- @return <Table> AST The AST of the tokens.
 function MathParserMethods:parse(tokens, expression)
-  self.Parser:resetToInitialState(tokens, self.operatorPrecedenceLevels, nil, expression)
-  local AST = self.Parser:parse()
+  self.Parser.resetToInitialState(tokens, self.operatorPrecedenceLevels, nil, expression)
+  local AST = self.Parser.parse()
   return AST
 end
 
@@ -48,7 +48,7 @@ end
 -- @param <Table> AST The AST to evaluate.
 -- @return <Number> evaluatedValue The result of the evaluation.
 function MathParserMethods:evaluate(AST)
-  self.Evaluator:resetToInitialState(AST, self.variables, self.operatorFunctions, self.functions)
+  self.Evaluator.resetToInitialState(AST, self.variables, self.operatorFunctions, self.functions)
   local evaluatedValue = self.Evaluator:evaluate()
   return evaluatedValue
 end
@@ -157,9 +157,9 @@ function MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, 
   MathParserInstance.functions = functions
 
   -- Classes
-  MathParserInstance.Lexer = Lexer:new(nil, operators)
-  MathParserInstance.Parser = Parser:new(nil, operatorPrecedenceLevels)
-  MathParserInstance.Evaluator = Evaluator:new(nil, variables, operatorFunctions, functions)
+  MathParserInstance.Lexer = Lexer(nil, operators)
+  MathParserInstance.Parser = Parser(nil, operatorPrecedenceLevels)
+  MathParserInstance.Evaluator = Evaluator(nil, variables, operatorFunctions, functions)
 
   -- Main
   inheritModule("MathParserInstance", MathParserInstance, "MathParserMethods", MathParserMethods)
