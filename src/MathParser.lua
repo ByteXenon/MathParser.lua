@@ -30,8 +30,12 @@ local MathParserMethods = {}
 -- @param <String> expression The expression to tokenize.
 -- @return <Table> tokens The tokens of the expression.
 function MathParserMethods:tokenize(expression)
+  if self.cachedTokens[expression] then
+    return self.cachedTokens[expression]
+  end
   self.Lexer.resetToInitialState(expression, self.operators)
   local tokens = self.Lexer.run()
+  self.cachedTokens[expression] = tokens
   return tokens
 end
 
@@ -39,8 +43,12 @@ end
 -- @param <Table> tokens The tokens to parse.
 -- @return <Table> AST The AST of the tokens.
 function MathParserMethods:parse(tokens, expression)
+  if self.cachedASTs[expression] then
+    return self.cachedASTs[expression]
+  end
   self.Parser.resetToInitialState(tokens, self.operatorPrecedenceLevels, nil, expression)
   local AST = self.Parser.parse()
+  self.cachedASTs[expression] = AST
   return AST
 end
 
@@ -155,6 +163,10 @@ function MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, 
   MathParserInstance.operatorFunctions = operatorFunctions
   MathParserInstance.operators = operators
   MathParserInstance.functions = functions
+
+  -- Caches
+  MathParserInstance.cachedTokens = {}
+  MathParserInstance.cachedASTs   = {}
 
   -- Classes
   MathParserInstance.Lexer = Lexer(nil, operators)
