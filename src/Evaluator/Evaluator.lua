@@ -144,8 +144,8 @@ local function Evaluator(expression, variables, operatorFunctions, functions)
   -- @param <Table?> givenVariables={} The variables to use in the evaluator.
   -- @param <Table?> givenOperatorFunctions=DEFAULT_OPERATOR_FUNCTIONS The operator functions to evaluate in the evaluator.
   -- @param <Table?> givenFunctions=DEFAULT_FUNCTIONS The functions to evaluate in the evaluator.
-  local function resetToInitialState(givenExpression, givenVariables, givenOperatorFunctions. givenFunctions)
-    assert(expression, "No expression given")
+  local function resetToInitialState(givenExpression, givenVariables, givenOperatorFunctions, givenFunctions)
+    assert(givenExpression, "No expression given")
 
     expression = givenExpression
     variables = givenVariables or {}
