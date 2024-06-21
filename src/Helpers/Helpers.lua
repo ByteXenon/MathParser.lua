@@ -1,7 +1,7 @@
 --[[
   Name: Helpers.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-14
+  Date: 2024-06-21
 --]]
 
 --* Imports *--
@@ -67,21 +67,6 @@ function Helpers.makeTrie(table)
     node.value = op
   end
   return trieTable
-end
-
---- Inherit a module into another module.
--- @param <String> parentModuleName The name of the parent module.
--- @param <Table> parentModule The table of the parent module.
--- @param <String> moduleName The name of the module to inherit.
--- @param <Table> moduleTable The table of the module to inherit.
-function Helpers.inheritModule(parentModuleName, parentModule, moduleName, moduleTable)
-  for index, value in pairs(moduleTable) do
-    if parentModule[index] then
-      local errorMessage = ("Conflicting names in %s and %s: %s"):format(parentModuleName, moduleName, index)
-      return error(errorMessage)
-    end
-    parentModule[index] = value
-  end
 end
 
 return Helpers

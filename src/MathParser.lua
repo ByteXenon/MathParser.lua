@@ -20,9 +20,6 @@ local Evaluator = require("Evaluator/Evaluator")
 local Lexer     = require("Lexer/Lexer")
 local Parser    = require("Parser/Parser")
 
---* Imports *--
-local inheritModule = Helpers.inheritModule
-
 --* MathParserMethods *--
 local MathParserMethods = {}
 
@@ -169,6 +166,9 @@ local MathParser = {}
 -- @return <Table> MathParserInstance The MathParser instance.
 function MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, operators, functions)
   local MathParserInstance = {}
+  for key, value in pairs(MathParserMethods) do
+    MathParserInstance[key] = value
+  end
 
   -- Properties
   MathParserInstance.operatorPrecedenceLevels = operatorPrecedenceLevels
@@ -185,9 +185,6 @@ function MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, 
   MathParserInstance.Lexer = Lexer(nil, operators)
   MathParserInstance.Parser = Parser(nil, operatorPrecedenceLevels)
   MathParserInstance.Evaluator = Evaluator(nil, variables, operatorFunctions, functions)
-
-  -- Main
-  inheritModule("MathParserInstance", MathParserInstance, "MathParserMethods", MathParserMethods)
 
   return MathParserInstance
 end
