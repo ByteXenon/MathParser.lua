@@ -1,7 +1,7 @@
 --[[
   Name: Lexer.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-20
+  Date: 2024-06-21
 --]]
 
 --* Dependencies *--
@@ -61,9 +61,10 @@ local function Lexer(expression, operators, charPos)
     curChar    = charStream[charPos or 1]
     curCharPos = charPos or 1
   end
-  local operatorTrie  = (operators and makeTrie(operators)) or DEFAULT_OPERATORS_TRIE
-  local operators     = operators or DEFAULT_OPERATORS
-  local operatorsTrie = operatorTrie
+  local operatorTrie       = (operators and makeTrie(operators)) or DEFAULT_OPERATORS_TRIE
+  local operators          = operators or DEFAULT_OPERATORS
+  local operatorsTrie      = operatorTrie
+  local stringToTableCache = {}
 
   --/ Helper methods /--
 
@@ -310,9 +311,11 @@ local function Lexer(expression, operators, charPos)
     -- If charStream is a string convert it to a table of characters
     if expression then
       expression = expression .. "\0"
-      charStream = stringToTable(expression)
+      charStream = stringToTableCache[expression] or stringToTable(expression)
       curChar    = charStream[1]
       curCharPos = 1
+
+      stringToTableCache[expression] = charStream
     end
 
     operatorsTrie = (givenOperators and makeTrie(givenOperators)) or DEFAULT_OPERATORS_TRIE
