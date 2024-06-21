@@ -1,7 +1,7 @@
 --[[
   Name: Parser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-20
+  Date: 2024-06-21
 --]]
 
 --* Dependencies *--
@@ -224,9 +224,9 @@ local function Parser(tokens, operatorPrecedenceLevels, tokenIndex, expression)
     local token = currentToken
     if not token then return end
 
-    local value = token.Value
-    local TYPE = token.TYPE
-    if TYPE == "Parentheses" and value == "(" then
+    local tokenValue = token.Value
+    local tokenType  = token.TYPE
+    if tokenType == "Parentheses" and tokenValue == "(" then
       consume() -- Consume the opening parenthesis
       local expression = parseExpression()
       if not currentToken or currentToken.Value ~= ")" then
@@ -234,7 +234,7 @@ local function Parser(tokens, operatorPrecedenceLevels, tokenIndex, expression)
       end
       consume() -- Consume the closing parenthesis
       return expression
-    elseif TYPE == "Variable" then
+    elseif tokenType == "Variable" then
       -- Check if it's a function call first
       if isFunctionCall() then
         return parseFunctionCall()
@@ -243,12 +243,12 @@ local function Parser(tokens, operatorPrecedenceLevels, tokenIndex, expression)
       -- It's a variable
       consume()
       return token
-    elseif TYPE == "Constant" then
+    elseif tokenType == "Constant" then
       consume()
       return token
     end
 
-    error(generateError(ERROR_UNEXPECTED_TOKEN, value))
+    error(generateError(ERROR_UNEXPECTED_TOKEN, tokenValue))
   end
 
   --- Parses the expression.
