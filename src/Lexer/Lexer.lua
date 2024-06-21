@@ -1,7 +1,7 @@
 --[[
   Name: Lexer.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-20
+  Date: 2024-06-21
 --]]
 
 --* Dependencies *--
@@ -252,10 +252,9 @@ local function Lexer(expression, operators, charPos)
       operator = node.value
       index = index + 1
     end
-    if operator then
-      consume(#operator - 1)
-    end
+    if not operator then return end
 
+    consume(#operator - 1)
     return operator
   end
 
