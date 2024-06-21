@@ -52,6 +52,7 @@ local PARENTHESIS_LOOKUP             = createPatternLookupTable("[()]")
 -- @param <Number?> charPos=1 The character position to start at.
 -- @return <Table> LexerInstance The Lexer instance.
 local function Lexer(expression, operators, charPos)
+  local stringToTableCache = {}
   local errors = {}
   local charStream, curChar, curCharPos
   if expression then
@@ -59,11 +60,12 @@ local function Lexer(expression, operators, charPos)
     charStream = stringToTable(expression)
     curChar    = charStream[charPos or 1]
     curCharPos = charPos or 1
+
+    stringToTableCache[expression] = charStream
   end
   local operatorTrie       = (operators and makeTrie(operators)) or DEFAULT_OPERATORS_TRIE
   local operators          = operators or DEFAULT_OPERATORS
   local operatorsTrie      = operatorTrie
-  local stringToTableCache = {}
 
   --/ Helper methods /--
 
