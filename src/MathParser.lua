@@ -53,8 +53,12 @@ end
 -- @param <Table> AST The AST to evaluate.
 -- @return <Number> evaluatedValue The result of the evaluation.
 function MathParserMethods:evaluate(AST)
+  if self.cachedResults[AST] then
+    return self.cachedResults[AST]
+  end
   self.Evaluator.resetToInitialState(AST, self.variables, self.operatorFunctions, self.functions)
   local evaluatedValue = self.Evaluator:evaluate()
+  self.cachedResults[AST] = evaluatedValue
   return evaluatedValue
 end
 
@@ -71,6 +75,8 @@ end
 function MathParserMethods:addVariable(variableName, variableValue)
   self.variables = self.variables or {}
   self.variables[variableName] = variableValue
+  -- Reset the cache so we won't get unexpected results
+  self.cachedResults = {}
 end
 
 --- Adds multiple variables to their values.
@@ -79,6 +85,8 @@ function MathParserMethods:addVariables(variables)
   for variableName, variableValue in pairs(variables) do
     self:addVariable(variableName, variableValue)
   end
+  -- Reset the cache so we won't get unexpected results
+  self.cachedResults = {}
 end
 
 --- Adds a function to the evaluator.
@@ -87,6 +95,8 @@ end
 function MathParserMethods:addFunction(functionName, functionValue)
   self.functions = self.functions or {}
   self.functions[functionName] = functionValue
+  -- Reset the cache so we won't get unexpected results
+  self.cachedResults = {}
 end
 
 --- Adds multiple functions to the evaluator.
@@ -95,6 +105,8 @@ function MathParserMethods:addFunctions(functions)
   for functionName, functionValue in pairs(functions) do
     self:addFunction(functionName, functionValue)
   end
+  -- Reset the cache so we won't get unexpected results
+  self.cachedResults = {}
 end
 
 --- Sets the operator precedence levels that the parser will use.
@@ -109,12 +121,16 @@ end
 -- @param <Table> variables The variables to use in the evaluator.
 function MathParserMethods:setVariables(variables)
   self.variables = variables
+  -- Reset the cache so we won't get unexpected results
+  self.cachedResults = {}
 end
 
 --- Sets the operator functions that the evaluator will use.
 -- @param <Table> operatorFunctions The operator functions to evaluate in the evaluator.
 function MathParserMethods:setOperatorFunctions(operatorFunctions)
   self.operatorFunctions = operatorFunctions
+  -- Reset the cache so we won't get unexpected results
+  self.cachedResults = {}
 end
 
 --- Sets the operators that the lexer will use.
@@ -129,12 +145,15 @@ end
 -- @param <Table> functions The functions to use in the evaluator
 function MathParserMethods:setFunctions(functions)
   self.functions = functions
+  -- Reset the cache so we won't get unexpected results
+  self.cachedResults = {}
 end
 
 --- Resets MathParser's caches.
 function MathParserMethods:resetCaches()
-  self.cachedTokens = {}
-  self.cachedASTs   = {}
+  self.cachedTokens  = {}
+  self.cachedASTs    = {}
+  self.cachedResults = {}
 end
 
 --- Resets the MathParser to its initial state.
@@ -150,8 +169,9 @@ function MathParserMethods:resetToInitialState(operatorPrecedenceLevels, variabl
   self.operators = operators
   self.functions = functions
 
-  self.cachedTokens = {}
-  self.cachedASTs = {}
+  self.cachedTokens  = {}
+  self.cachedASTs    = {}
+  self.cachedResults = {}
 end
 
 --* MathParser *--
@@ -178,8 +198,9 @@ function MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, 
   MathParserInstance.functions = functions
 
   -- Caches
-  MathParserInstance.cachedTokens = {}
-  MathParserInstance.cachedASTs   = {}
+  MathParserInstance.cachedTokens  = {}
+  MathParserInstance.cachedASTs    = {}
+  MathParserInstance.cachedResults = {}
 
   -- Classes
   MathParserInstance.Lexer = Lexer(nil, operators)
