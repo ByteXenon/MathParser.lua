@@ -55,7 +55,7 @@ local function Lexer(expression, operators, charPos)
   local errors = {}
   local charStream, curChar, curCharPos
   if expression then
-    expression = expression .. "\0"
+    expression = expression
     charStream = stringToTable(expression)
     curChar    = charStream[charPos or 1]
     curCharPos = charPos or 1
@@ -70,7 +70,7 @@ local function Lexer(expression, operators, charPos)
   --- Gets the next character from the character stream.
   -- @return <String> char The next character.
   local function peek()
-    return charStream[curCharPos + 1]
+    return charStream[curCharPos + 1] or "\0"
   end
 
   --- Consumes the next character from the character stream.
@@ -78,7 +78,7 @@ local function Lexer(expression, operators, charPos)
   -- @return <String> char The next character.
   local function consume(n)
     local newCurCharPos = curCharPos + (n or 1)
-    local newCurChar    = charStream[newCurCharPos]
+    local newCurChar    = charStream[newCurCharPos] or "\0"
     curCharPos = newCurCharPos
     curChar    = newCurChar
     return newCurChar
@@ -309,7 +309,7 @@ local function Lexer(expression, operators, charPos)
   local function resetToInitialState(expression, givenOperators)
     -- If charStream is a string convert it to a table of characters
     if expression then
-      expression = expression .. "\0"
+      expression = expression
       charStream = stringToTableCache[expression] or stringToTable(expression)
       curChar    = charStream[1]
       curCharPos = 1
