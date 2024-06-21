@@ -1,7 +1,7 @@
 --[[
   Name: TokenFactory.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-20
+  Date: 2024-06-21
   Description:
     This module contains the functions that will be
     Used to create tokens during the lexing process.
@@ -23,7 +23,7 @@ function TokenFactory.createOperatorToken(value, curCharPos)
   return { TYPE = "Operator", Value = value, Position = curCharPos }
 end
 function TokenFactory.createCommaToken(curCharPos)
-  return { TYPE = "Comma", Position = curCharPos }
+  return { TYPE = "Comma", Value = ",", Position = curCharPos }
 end
 
 return TokenFactory
