@@ -152,35 +152,42 @@ end
 
 local invalidExpressions = {
   -- Lexer errors
-  "~2", -- Unknown character before number
-  "2~", -- Unknown character after number
-  ".", -- Missing digits after decimal point
-  "1.", -- Missing digits after decimal point
-  "1e", -- Missing exponent
-  "1e+", -- Missing exponent value
-  "0x", -- Missing hexadecimal digits
+  "~2",    -- Contains an unknown character '~' before a number.
+  "2~",    -- Contains an unknown character '~' after a number.
+  ".",     -- Only a decimal point without any digits.
+  "1.",    -- Missing digits after the decimal point.
+  "1e",    -- Exponential notation missing an exponent.
+  "1e+",   -- Exponential notation missing an exponent after the sign.
+  "0x",    -- Hexadecimal notation missing digits.
+  "1..2",  -- Contains multiple decimal points in a number.
+  "0xG",   -- Contains an invalid hexadecimal digit 'G'.
+  "1e-+2", -- Exponential notation with an invalid sign combination.
 
   -- Parser errors
-  "+ 2",     -- Missing left operand
-  "2 +",     -- Missing right operand
-  "2 + 3 +", -- Missing right operand after binary operator
-  "-2-",     -- Missing operand after unary operator
-  "--",      -- Missing operand after unary operator
-  "2 + 3)",  -- Missing left parenthesis
-  "(2 + 3",  -- Missing right parenthesis
-  -- "sin" is one of default functions
-  "sin(,)",    -- Missing arguments in function call
-  "sin(1,,1)", -- Missing argument in-between in function call
-  "sin(1,)",   -- Missing second argument in function call
-  "sin(,1)",   -- Missing first argument in function call
-  "sin(1,2",   -- Missing right parenthesis in function call
-  "sin(1,",    -- Missing right parenthesis in function call
+  "+ 2",       -- Unary plus operator missing its left operand.
+  "2 +",       -- Binary plus operator missing its right operand.
+  "2 + 3 +",   -- Binary plus operator missing its right operand after another operator.
+  "-2-",       -- Unary minus operator missing its right operand.
+  "--",        -- Double unary minus operators missing their operand.
+  "2 + 3)",    -- Unmatched right parenthesis.
+  "(2 + 3",    -- Unmatched left parenthesis.
+  "sin(,)",    -- Function call missing all arguments.
+  "sin(1,,1)", -- Function call with missing argument between commas.
+  "sin(1,)",   -- Function call missing second argument after comma.
+  "sin(,1)",   -- Function call missing first argument before comma.
+  "sin(1,2",   -- Function call missing closing parenthesis.
+  "sin(1,",    -- Function call missing closing parenthesis and second argument.
+  "sin(",      -- Function call missing closing parenthesis and argument.
+  "()",        -- Empty parentheses without any expression.
+  "sin()",     -- Function call without any arguments.
+  "2 **",      -- Unexpected operator after multiplication operator.
+  "2 * / 3",   -- Missing operand between multiplication and division operators.
 
   -- Evaluator errors
-  "1 + unknownVariable",
-  "-unknownVariable",
-  "sin(unknownVariable)",
-  "unknownFunction(1)",
+  "1 + unknownVariable",  -- Expression contains an undefined variable.
+  "-unknownVariable",     -- Unary minus applied to an undefined variable.
+  "sin(unknownVariable)", -- Function call with an undefined variable as argument.
+  "unknownFunction(1)",   -- Call to an undefined function.
 }
 
 for _, expression in ipairs(invalidExpressions) do
