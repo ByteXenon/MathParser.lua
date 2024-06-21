@@ -1,7 +1,7 @@
 --[[
   Name: MathParser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-20
+  Date: 2024-06-21
 --]]
 
 local scriptPath, requirePath, localPath, oldPath
@@ -104,6 +104,8 @@ end
 -- @param <Table> operatorPrecedenceLevels The operator precedence levels to use in the parser.
 function MathParserMethods:setOperatorPrecedenceLevels(operatorPrecedenceLevels)
   self.operatorPrecedenceLevels = operatorPrecedenceLevels
+  -- Reset the cache so we won't get unexpected results
+  self.cachedASTs = {}
 end
 
 --- Sets the variables that the evaluator will use.
@@ -122,6 +124,8 @@ end
 -- @param <Table> operators The operators that the lexer will use.
 function MathParserMethods:setOperators(operators)
   self.operators = operators
+   -- Reset the cache so we won't get unexpected results
+  self.cachedTokens = {}
 end
 
 --- Sets the functions that the evaluator will use.
