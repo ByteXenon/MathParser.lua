@@ -43,16 +43,15 @@ end
 -- @return <Table> trieTable The trie table.
 function Helpers.makeTrie(table)
   local trieTable = {}
-
   for _, op in ipairs(table) do
     local node = trieTable
-    for index = 1, #op do
-      local character = op:sub(index, index)
+    for character in op:gmatch(".") do
       node[character] = node[character] or {}
       node = node[character]
     end
     node.value = op
   end
+
   return trieTable
 end
 
