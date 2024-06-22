@@ -1,18 +1,8 @@
 --[[
   Name: MathParser.lua
   Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-21
+  Date: 2024-06-22
 --]]
-
-local scriptPath, requirePath, localPath, oldPath
-if not LUAXEN_PACKER then
-  -- Localize the path, so this file can be run from anywhere
-  scriptPath = (debug.getinfo(1).source:match("@?(.*/)") or "")
-  requirePath = scriptPath .. "./?.lua"
-  localPath = scriptPath .. "./"
-  oldPath = package.path
-  package.path = package.path .. ";" .. requirePath
-end
 
 --* Dependencies *--
 local Helpers   = require("Helpers/Helpers")
@@ -208,11 +198,6 @@ function MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, 
   MathParserInstance.Evaluator = Evaluator(nil, variables, operatorFunctions, functions)
 
   return MathParserInstance
-end
-
-if not LUAXEN_PACKER then
-  -- Reset package.path
-  package.path = oldPath
 end
 
 return MathParser
