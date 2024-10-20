@@ -55,4 +55,17 @@ function Helpers.makeTrie(table)
   return trieTable
 end
 
+--- Inserts values from the source table into the destination table.
+-- @param <Table> source The source table.
+-- @param <Table> destination The destination table.
+function Helpers.insertValues(source, destination)
+  for key, value in pairs(source) do
+    if destination[key] then
+      error("Key already exists in destination table: " .. key)
+    end
+
+    destination[key] = value
+  end
+end
+
 return Helpers
