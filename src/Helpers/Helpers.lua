@@ -1,7 +1,7 @@
 --[[
   Name: Helpers.lua
-  Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-21
+  Author: ByteXenon
+  Date: 2024-10-20
 --]]
 
 --* Imports *--

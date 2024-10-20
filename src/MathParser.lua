@@ -1,7 +1,7 @@
 --[[
   Name: MathParser.lua
-  Author: ByteXenon [Luna Gilbert]
-  Date: 2024-06-22
+  Author: ByteXenon
+  Date: 2024-10-20
 --]]
 
 --* Dependencies *--

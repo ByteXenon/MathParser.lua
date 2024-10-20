@@ -1,7 +1,7 @@
 --[[
   Name: NodeFactory.lua
-  Author: ByteXenon [Luna Gilbert]
-  Date: 2024-01-11
+  Author: ByteXenon
+  Date: 2024-10-20
 --]]
 
 --* NodeFactory *--
