@@ -12,7 +12,6 @@ local NodeFactory = require("Parser/NodeFactory")
 local stringToTable = Helpers.stringToTable
 
 local insert = table.insert
-local concat = table.concat
 local max    = math.max
 local min    = math.min
 local rep    = string.rep
@@ -41,9 +40,6 @@ local DEFAULT_OPERATOR_PRECEDENCE_LEVELS = {
     ["+"] = 1, ["-"] = 1 },
   RightAssociativeBinaryOperators = { ["^"] = true }
 }
-
---* ParserMethods *--
-local ParserMethods = {}
 
 --* Parser *--
 --- @class Creates a new Parser instance
