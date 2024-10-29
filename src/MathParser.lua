@@ -10,6 +10,9 @@ local Evaluator = require("Evaluator/Evaluator")
 local Lexer     = require("Lexer/Lexer")
 local Parser    = require("Parser/Parser")
 
+--* Imports *--
+local insertValues = Helpers.insertValues
+
 --* MathParserMethods *--
 local MathParserMethods = {}
 
@@ -20,8 +23,9 @@ function MathParserMethods:tokenize(expression)
   if self.cachedTokens[expression] then
     return self.cachedTokens[expression]
   end
-  self.Lexer.resetToInitialState(expression, self.operators)
-  local tokens = self.Lexer.run()
+  self.Lexer:resetToInitialState(expression, self.operators)
+
+  local tokens = self.Lexer:run()
   self.cachedTokens[expression] = tokens
   return tokens
 end
@@ -33,8 +37,9 @@ function MathParserMethods:parse(tokens, expression)
   if self.cachedASTs[expression] then
     return self.cachedASTs[expression]
   end
-  self.Parser.resetToInitialState(tokens, self.operatorPrecedenceLevels, nil, expression)
-  local AST = self.Parser.parse()
+  self.Parser:resetToInitialState(tokens, self.operatorPrecedenceLevels, nil, expression)
+
+  local AST = self.Parser:parse()
   self.cachedASTs[expression] = AST
   return AST
 end
@@ -46,7 +51,9 @@ function MathParserMethods:evaluate(AST)
   if self.cachedResults[AST] then
     return self.cachedResults[AST]
   end
-  self.Evaluator.resetToInitialState(AST, self.variables, self.operatorFunctions, self.functions)
+
+  self.Evaluator:resetToInitialState(AST, self.variables, self.operatorFunctions, self.functions)
+
   local evaluatedValue = self.Evaluator:evaluate()
   self.cachedResults[AST] = evaluatedValue
   return evaluatedValue
@@ -65,6 +72,7 @@ end
 function MathParserMethods:addVariable(variableName, variableValue)
   self.variables = self.variables or {}
   self.variables[variableName] = variableValue
+
   -- Reset the cache so we won't get unexpected results
   self.cachedResults = {}
 end
@@ -75,6 +83,7 @@ function MathParserMethods:addVariables(variables)
   for variableName, variableValue in pairs(variables) do
     self:addVariable(variableName, variableValue)
   end
+
   -- Reset the cache so we won't get unexpected results
   self.cachedResults = {}
 end
@@ -85,6 +94,7 @@ end
 function MathParserMethods:addFunction(functionName, functionValue)
   self.functions = self.functions or {}
   self.functions[functionName] = functionValue
+
   -- Reset the cache so we won't get unexpected results
   self.cachedResults = {}
 end
@@ -95,6 +105,7 @@ function MathParserMethods:addFunctions(functions)
   for functionName, functionValue in pairs(functions) do
     self:addFunction(functionName, functionValue)
   end
+
   -- Reset the cache so we won't get unexpected results
   self.cachedResults = {}
 end
@@ -103,6 +114,7 @@ end
 -- @param <Table> operatorPrecedenceLevels The operator precedence levels to use in the parser.
 function MathParserMethods:setOperatorPrecedenceLevels(operatorPrecedenceLevels)
   self.operatorPrecedenceLevels = operatorPrecedenceLevels
+
   -- Reset the cache so we won't get unexpected results
   self.cachedASTs = {}
 end
@@ -111,6 +123,7 @@ end
 -- @param <Table> variables The variables to use in the evaluator.
 function MathParserMethods:setVariables(variables)
   self.variables = variables
+
   -- Reset the cache so we won't get unexpected results
   self.cachedResults = {}
 end
@@ -119,6 +132,7 @@ end
 -- @param <Table> operatorFunctions The operator functions to evaluate in the evaluator.
 function MathParserMethods:setOperatorFunctions(operatorFunctions)
   self.operatorFunctions = operatorFunctions
+
   -- Reset the cache so we won't get unexpected results
   self.cachedResults = {}
 end
@@ -127,6 +141,7 @@ end
 -- @param <Table> operators The operators that the lexer will use.
 function MathParserMethods:setOperators(operators)
   self.operators = operators
+
    -- Reset the cache so we won't get unexpected results
   self.cachedTokens = {}
 end
@@ -135,6 +150,7 @@ end
 -- @param <Table> functions The functions to use in the evaluator
 function MathParserMethods:setFunctions(functions)
   self.functions = functions
+
   -- Reset the cache so we won't get unexpected results
   self.cachedResults = {}
 end
@@ -176,9 +192,6 @@ local MathParser = {}
 -- @return <Table> MathParserInstance The MathParser instance.
 function MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, operators, functions)
   local MathParserInstance = {}
-  for key, value in pairs(MathParserMethods) do
-    MathParserInstance[key] = value
-  end
 
   -- Properties
   MathParserInstance.operatorPrecedenceLevels = operatorPrecedenceLevels
@@ -193,9 +206,11 @@ function MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, 
   MathParserInstance.cachedResults = {}
 
   -- Classes
-  MathParserInstance.Lexer = Lexer(nil, operators)
-  MathParserInstance.Parser = Parser(nil, operatorPrecedenceLevels)
-  MathParserInstance.Evaluator = Evaluator(nil, variables, operatorFunctions, functions)
+  MathParserInstance.Lexer     = Lexer.new(nil, operators)
+  MathParserInstance.Parser    = Parser.new(nil, operatorPrecedenceLevels)
+  MathParserInstance.Evaluator = Evaluator.new(nil, variables, operatorFunctions, functions)
+
+  insertValues(MathParserMethods, MathParserInstance)
 
   return MathParserInstance
 end

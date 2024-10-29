@@ -5,10 +5,10 @@
 --]]
 
 --* Imports *--
-local char   = string.char
-local match  = string.match
-local gmatch = string.gmatch
-local insert = table.insert
+local strChar   = string.char
+local strMatch  = string.match
+local strGmatch = string.gmatch
+local tbInsert  = table.insert
 
 --* Helpers *--
 local Helpers = {}
@@ -18,8 +18,8 @@ local Helpers = {}
 -- @return <Table> table The table of characters.
 function Helpers.stringToTable(string)
   local table = {}
-  for char in gmatch(string, ".") do
-    insert(table, char)
+  for char in strGmatch(string, ".") do
+    tbInsert(table, char)
   end
   return table
 end
@@ -30,8 +30,8 @@ end
 function Helpers.createPatternLookupTable(pattern)
   local lookupTable = {}
   for i = 0, 255 do
-    local character = char(i)
-    if match(character, pattern) then
+    local character = strChar(i)
+    if strMatch(character, pattern) then
       lookupTable[character] = true
     end
   end
