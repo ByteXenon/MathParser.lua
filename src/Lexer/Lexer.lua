@@ -103,46 +103,41 @@ end
 --- Consumes the next hexadecimal number from the character stream.
 -- @param <Table> number The number character table to append the next number to.
 -- @return <Table> number The parsed hexadecimal number.
-function LexerMethods:consumeHexNumber(number)
-  insert(number, self:consume()) -- consume the '0'
+function LexerMethods:consumeHexNumber(numberStart)
+  self:consume() -- consume the '0'
   local isHex = HEXADECIMAL_NUMBER_LOOKUP[self:peek()]
   if not isHex then
     local generatedErrorMessage = self:generateErrorMessage(ERROR_NUMBER_AFTER_X, 1)
     insert(self.errors, generatedErrorMessage)
   end
   repeat
-    insert(number, self:consume())
+    self:consume()
     isHex = HEXADECIMAL_NUMBER_LOOKUP[self:peek()]
   until not isHex
-  return number
+  return self.expression:sub(numberStart, self.curCharPos)
 end
 
 --- Consumes the next floating point number from the character stream.
--- @param <Table> number The number character table to append the next number to.
--- @return <Tabel> number The parsed floating point number.
-function LexerMethods:consumeFloatNumber(number)
-  insert(number, self:consume()) -- consume the digit before the decimal point
+function LexerMethods:consumeFloatNumber()
+  self:consume() -- consume the digit before the decimal point
   local isNumber = NUMBER_LOOKUP[self:peek()]
   if not isNumber then
     local generatedErrorMessage = self:generateErrorMessage(ERROR_NUMBER_AFTER_DECIMAL_POINT, 1)
     insert(self.errors, generatedErrorMessage)
   end
   repeat
-    insert(number, self:consume())
+    self:consume()
     isNumber = NUMBER_LOOKUP[self:peek()]
   until not isNumber
-  return number
 end
 
 --- Consumes the next number in scientific notation from the character stream.
--- @param <Table> number The number character table to append the next number to.
--- @return <Table> number The parsed number in scientific notation
-function LexerMethods:consumeScientificNumber(number)
-  insert(number, self:consume()) -- consume the digit before the exponent
+function LexerMethods:consumeScientificNumber()
+  self:consume() -- consume the digit before the exponent
   -- An optional sign, default: +
   if PLUS_MINUS_LOOKUP[self:peek()] then
     -- consume the exponent sign, and insert the plus/minus sign
-    insert(number, self:consume())
+    self:consume()
   end
   local isNumber = NUMBER_LOOKUP[self:peek()]
   if not isNumber then
@@ -151,38 +146,37 @@ function LexerMethods:consumeScientificNumber(number)
   end
 
   repeat
-    insert(number, self:consume())
+    self:consume()
     isNumber = NUMBER_LOOKUP[self:peek()]
   until not isNumber
-  return number
 end
 
 --- Consumes the next number from the character stream.
 -- @return <String> number The next number.
 function LexerMethods:consumeNumber()
-  local number       = { self.curChar }
+  local numberStart = self.curCharPos
 
   -- Check for hexadecimal numbers
   if self.curChar == '0' and HEXADECIMAL_X_LOOKUP[self:peek()] then
-    return concat(self:consumeHexNumber(number))
+    return self:consumeHexNumber(numberStart)
   end
 
   while NUMBER_LOOKUP[self:peek()] do
-    insert(number, self:consume())
+    self:consume()
   end
 
   -- Check for floating point numbers
   if self:peek() == "." then
-    number = self:consumeFloatNumber(number)
+    self:consumeFloatNumber()
   end
 
   -- Check for scientific notation
   local nextChar = self:peek()
   if SCIENTIFIC_E_LOOKUP[nextChar] then
-    number = self:consumeScientificNumber(number)
+    self:consumeScientificNumber()
   end
 
-  return concat(number)
+  return self.expression:sub(numberStart, self.curCharPos)
 end
 
 --- Consumes the next identifier from the character stream.
