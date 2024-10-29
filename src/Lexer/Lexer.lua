@@ -161,9 +161,6 @@ end
 -- @return <String> number The next number.
 function LexerMethods:consumeNumber()
   local number       = { self.curChar }
-  local isFloat      = false
-  local isScientific = false
-  local isHex        = false
 
   -- Check for hexadecimal numbers
   if self.curChar == '0' and HEXADECIMAL_X_LOOKUP[self:peek()] then
