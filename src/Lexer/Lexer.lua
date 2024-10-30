@@ -50,14 +50,14 @@ local PARENTHESIS_LOOKUP             = createPatternLookupTable("[()]")
 local LexerMethods = {}
 
 --- Gets the next character from the character stream.
--- @return <String> char The next character.
+--- @return string char The next character.
 function LexerMethods:peek()
   return self.charStream[self.curCharPos + 1] or "\0"
 end
 
 --- Consumes the next character from the character stream.
--- @param <Number?> n=1 The amount of characters to go ahead.
--- @return <String> char The next character.
+--- @param n number? The amount of characters to go ahead. Default is 1.
+--- @return string char The next character.
 function LexerMethods:consume(n)
   local newCurCharPos = self.curCharPos + (n or 1)
   local newCurChar    = self.charStream[newCurCharPos] or "\0"
@@ -66,12 +66,10 @@ function LexerMethods:consume(n)
   return newCurChar
 end
 
---/ Error handling /--
-
 --- Generates an error message with a pointer to the current character.
--- @param <String> message The error message.
--- @param <Number?> positionAdjustment=0 The position adjustment to apply to the pointer.
--- @return <String> errorMessage The error message with a pointer.
+--- @param message string The error message.
+--- @param positionAdjustment number? The position adjustment to apply to the pointer. Default is 0.
+--- @return string errorMessage The error message with a pointer.
 function LexerMethods:generateErrorMessage(message, positionAdjustment)
   local position     = self.curCharPos + (positionAdjustment or 0)
   local pointer      = rep(" ", position - 1) .. "^"
@@ -88,21 +86,17 @@ function LexerMethods:displayErrors()
   end
 end
 
---/ Character checks /--
-
 --- Checks if the given character is a number.
--- @param <String?> char=curChar The character to check.
--- @return <Boolean> isNumber Whether the character is a number.
+--- @param char string? The character to check. Default is the current character.
+--- @return boolean isNumber Whether the character is a number.
 function LexerMethods:isNumber(char)
   local char = (char or self.curChar)
   return NUMBER_LOOKUP[char] or (char == "." and NUMBER_LOOKUP[self:peek()])
 end
 
---/ Token consumers /--
-
 --- Consumes the next hexadecimal number from the character stream.
--- @param <Table> number The number character table to append the next number to.
--- @return <Table> number The parsed hexadecimal number.
+--- @param numberStart number The starting position of the number.
+--- @return string number The parsed hexadecimal number.
 function LexerMethods:consumeHexNumber(numberStart)
   self:consume() -- consume the '0'
   local isHex = HEXADECIMAL_NUMBER_LOOKUP[self:peek()]
@@ -152,7 +146,7 @@ function LexerMethods:consumeScientificNumber()
 end
 
 --- Consumes the next number from the character stream.
--- @return <String> number The next number.
+--- @return string number The next number.
 function LexerMethods:consumeNumber()
   local numberStart = self.curCharPos
 
@@ -180,7 +174,7 @@ function LexerMethods:consumeNumber()
 end
 
 --- Consumes the next identifier from the character stream.
--- @return <String> identifier The next identifier.
+--- @return string identifier The next identifier.
 function LexerMethods:consumeIdentifier()
   local identifier, identifierLen = {}, 0
   local nextChar
@@ -194,7 +188,7 @@ function LexerMethods:consumeIdentifier()
 end
 
 --- Consumes the next constant from the character stream.
--- @return <Table> constantToken The next constant token.
+--- @return table|nil constantToken The next constant token or nil if the character is invalid.
 function LexerMethods:consumeConstant()
   -- <number>
   if self:isNumber(self.curChar) then
@@ -207,7 +201,7 @@ function LexerMethods:consumeConstant()
 end
 
 --- Consumes the next operator from the character stream.
--- @return <Table> operatorToken The next operator token.
+--- @return table|nil operatorToken The next operator token or nil if the next string sequence is not an operator. 
 function LexerMethods:consumeOperator()
   local node       = self.operatorsTrie
   local charStream = self.charStream
@@ -231,7 +225,7 @@ function LexerMethods:consumeOperator()
 end
 
 --- Consumes the next token from the character stream.
--- @return <Table> token The next token.
+--- @return table|nil token The next token or nil if the character is a whitespace/invalid constant.
 function LexerMethods:consumeToken()
   local curChar = self.curChar
 
@@ -254,7 +248,7 @@ function LexerMethods:consumeToken()
 end
 
 --- Consumes all the tokens from the character stream.
--- @return <Table> tokens The tokens.
+--- @return table tokens The tokens.
 function LexerMethods:consumeTokens()
   local tokens, tokensLen = {}, 0
 
@@ -272,11 +266,9 @@ function LexerMethods:consumeTokens()
   return tokens
 end
 
---// PUBLIC METHODS \\--
-
 --- Resets the lexer to its initial state.
--- @param <String?> expression The character stream to reset to.
--- @param <Table?> givenOperators=DEFAULT_OPERATORS The operators to reset to.
+--- @param expression string? The character stream to reset to.
+--- @param givenOperators table? The operators to reset to. Default is DEFAULT_OPERATORS.
 function LexerMethods:resetToInitialState(expression, givenOperators)
   -- If charStream is a string convert it to a table of characters
   if expression then
@@ -293,7 +285,7 @@ function LexerMethods:resetToInitialState(expression, givenOperators)
 end
 
 --- Runs the lexer.
--- @return <Table> tokens The tokens of the expression.
+--- @return table tokens The tokens of the expression.
 function LexerMethods:run()
   assert(self.charStream, ERROR_NO_CHAR_STREAM)
   self.errors = {}
@@ -306,11 +298,11 @@ end
 --* Lexer *--
 local Lexer = {}
 
---- @class Creates a new Lexer.
--- @param <String?> expression The expression to tokenize.
--- @param <Table?> operators=DEFAULT_OPERATORS The operators to use.
--- @param <Number?> charPos=1 The character position to start at.
--- @return <Table> LexerInstance The Lexer instance.
+--- @class LexerInstance
+--- @param expression string? The expression to tokenize.
+--- @param operators table? The operators to use.
+--- @param charPos number? The character position to start at.
+--- @return table LexerInstance The Lexer instance.
 function Lexer.new(expression, operators, charPos)
   local LexerInstance = {}
   LexerInstance.stringToTableCache = {}
