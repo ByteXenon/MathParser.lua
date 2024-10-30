@@ -46,15 +46,15 @@ local DEFAULT_OPERATOR_PRECEDENCE_LEVELS = {
 local ParserMethods = {}
 
 --- Get the next token from the token stream. N is the amount of tokens to skip.
--- @param <Number?> n=1 The amount of tokens to skip in order to get the next token.
--- @return <Table> token The next token.
+--- @param n number? The amount of tokens to skip in order to get the next token. Default is 1.
+--- @return table token The next token.
 function ParserMethods:peek(n)
   return self.tokens[self.currentTokenIndex + (n or 1)]
 end
 
 --- Consumes the next token from the token stream. N is the amount of tokens to go ahead.
--- @param <Number?> n=1 The amount of tokens to go ahead.
--- @return <Table> currentToken The current token
+--- @param n number? The amount of tokens to go ahead. Default is 1.
+--- @return table currentToken The current token.
 function ParserMethods:consume(n)
   local newCurrentTokenIndex = self.currentTokenIndex + (n or 1)
   local newCurrentToken      = self.tokens[newCurrentTokenIndex]
@@ -64,50 +64,50 @@ function ParserMethods:consume(n)
 end
 
 --- Checks if the given token is a binary operator.
--- @param <Table?> token=currentToken The token to check.
--- @return <Boolean> isBinaryOperator Whether the token is a binary operator.
+--- @param token table? The token to check. Default is the current token.
+--- @return boolean isBinaryOperator Whether the token is a binary operator.
 function ParserMethods:isBinaryOperator(token)
   local token = token or self.currentToken
-  if not self.operatorPrecedenceLevels.Binary then return end
+  if not self.operatorPrecedenceLevels.Binary then return false end
   return token and token.TYPE == "Operator" and self.operatorPrecedenceLevels.Binary[token.Value]
 end
 
 --- Checks if the given token is an unary operator.
--- @param <Table?> token=currentToken The token to check.
--- @return <Boolean> isUnaryOperator Whether the token is an unary operator.
+--- @param token table? The token to check. Default is the current token.
+--- @return boolean isUnaryOperator Whether the token is an unary operator.
 function ParserMethods:isUnaryOperator(token)
   local token = token or self.currentToken
-  if not self.operatorPrecedenceLevels.Unary then return end
+  if not self.operatorPrecedenceLevels.Unary then return false end
   return token and token.TYPE == "Operator" and self.operatorPrecedenceLevels.Unary[token.Value]
 end
 
 --- Checks if the given token is a right associative binary operator.
--- @param <Table?> token=currentToken The token to check.
--- @return <Boolean> isRightAssociativeBinaryOperator Whether the token is a right associative binary operator.
+--- @param token table? The token to check. Default is the current token.
+--- @return boolean isRightAssociativeBinaryOperator Whether the token is a right associative binary operator.
 function ParserMethods:isRightAssociativeBinaryOperator(token)
   local token = token or self.currentToken
-  if not self.operatorPrecedenceLevels.RightAssociativeBinaryOperators then return end
+  if not self.operatorPrecedenceLevels.RightAssociativeBinaryOperators then return false end
   return token and token.TYPE == "Operator" and self.operatorPrecedenceLevels.RightAssociativeBinaryOperators[token.Value]
 end
 
---- Checks if the current token is a function call
--- @return <Boolean> isFunctionCall Whether the current token is a function call.
+--- Checks if the current token is a function call.
+--- @return boolean isFunctionCall Whether the current token is a function call.
 function ParserMethods:isFunctionCall()
   local nextToken = self:peek()
-  if not nextToken then return end
+  if not nextToken then return false end
   return self.currentToken.TYPE == "Variable" and nextToken.TYPE == "Parentheses" and nextToken.Value == "("
 end
 
 --- Gets the precedence of the given token.
--- @param <Table> token The token to get the precedence of.
--- @return <Number> precedence The precedence of the token.
+--- @param token table The token to get the precedence of.
+--- @return number|nil precedence The precedence of the token or nil if it doesn't have a precedence.
 function ParserMethods:getPrecedence(token)
   return token and self.operatorPrecedenceLevels.Binary[token.Value]
 end
 
 --- Generate error message pointing to the current token.
--- @param <String> message The error message.
--- @param <...> ... The arguments to format the message with.
+--- @param message string The error message.
+--- @param ... any The arguments to format the message with.
 function ParserMethods:generateError(message, ...)
   if not self.expression then
     -- In case we don't have the charStream, we can't generate a proper error message
@@ -128,7 +128,7 @@ function ParserMethods:generateError(message, ...)
 end
 
 --- Parses the function call.
--- @return <Table> expression The AST of the function call.
+--- @return table expression The AST of the function call.
 function ParserMethods:parseFunctionCall()
   -- <function call> ::= <variable> "(" <expression> ["," <expression>]* ")"
   local functionName = self.currentToken.Value
@@ -158,8 +158,8 @@ function ParserMethods:parseFunctionCall()
 end
 
 --- Parses the binary operator.
--- @param <Number> minPrecedence The minimum precedence of the operator.
--- @return <Table> expression The AST of the binary operator.
+--- @param minPrecedence number The minimum precedence of the operator.
+--- @return table|nil expression The AST of the binary operator.
 function ParserMethods:parseBinaryOperator(minPrecedence)
   -- <binary> ::= <unary> <binary operator> <binary> | <unary>
   local expression = self:parseUnaryOperator()
@@ -174,14 +174,14 @@ function ParserMethods:parseBinaryOperator(minPrecedence)
     if not self:consume() then -- Consume the operator
       error(self:generateError(ERROR_EXPECTED_EXPRESSION))
     end
-    local right = self:parseBinaryOperator(precedence)
+    local right = self:parseBinaryOperator(precedence or 0)
     expression = createOperatorNode(operatorToken.Value, expression, right)
   end
   return expression
 end
 
 --- Parses the unary operator.
--- @return <Table> expression The AST of the unary operator.
+--- @return table|nil expression The AST of the unary operator.
 function ParserMethods:parseUnaryOperator()
   -- <unary> ::= <unary operator> <unary> | <primary>
   if not self:isUnaryOperator(self.currentToken) then
@@ -199,7 +199,7 @@ function ParserMethods:parseUnaryOperator()
 end
 
 --- Parses the primary expression.
--- @return <Table> expression The AST of the primary expression.
+--- @return table|nil expression The AST of the primary expression.
 function ParserMethods:parsePrimaryExpression()
   -- <primary> ::= <constant> | <variable> | <function call> | "(" <expression> ")"
   local token = self.currentToken
@@ -233,30 +233,36 @@ function ParserMethods:parsePrimaryExpression()
 end
 
 --- Parses the expression.
--- @return <Table> expression The AST of the expression.
+--- @return table expression The AST of the expression.
 function ParserMethods:parseExpression()
   local expression = self:parseBinaryOperator(0)
+  if not expression then
+    error(self:generateError(ERROR_EXPECTED_EXPRESSION))
+  end
+
   return expression
 end
 
 --// PUBLIC METHODS \\--
 
 --- Resets the parser to its initial state so it can be reused.
--- @param <Table> tokens The tokens to reset to.
--- @param <Table?> operatorPrecedenceLevels=DEFAULT_OPERATOR_PRECEDENCE_LEVELS The operator precedence levels to reset to.
+--- @param givenTokens table The tokens to reset to.
+--- @param givenOperatorPrecedenceLevels table? The operator precedence levels to reset to. Default is DEFAULT_OPERATOR_PRECEDENCE_LEVELS.
+--- @param givenTokenIndex number? The index of the current token. Default is 1.
+--- @param givenExpression string? The expression to show during an error (e.g unexpected operator, etc.).
 function ParserMethods:resetToInitialState(givenTokens, givenOperatorPrecedenceLevels, givenTokenIndex, givenExpression)
   assert(givenTokens, ERROR_NO_TOKENS)
 
-  self.tokens = givenTokens
+  self.tokens            = givenTokens
   self.currentTokenIndex = givenTokenIndex or 1
-  self.currentToken = givenTokens[givenTokenIndex or 1]
+  self.currentToken      = givenTokens[givenTokenIndex or 1]
 
   self.operatorPrecedenceLevels = givenOperatorPrecedenceLevels or DEFAULT_OPERATOR_PRECEDENCE_LEVELS
   self.expression               = givenExpression
 end
 
 --- Parses the given tokens, and returns the AST.
--- @return <Table> expression The AST of the tokens.
+--- @return table expression The AST of the tokens.
 function ParserMethods:parse(noErrors)
   assert(self.tokens, ERROR_NO_TOKENS_TO_PARSE)
 
@@ -271,17 +277,17 @@ end
 --* Parser *--
 local Parser = {}
 
---- @class Creates a new Parser instance
--- @param <Table> tokens The tokens to parse
--- @param <Table?> operatorPrecedenceLevels=DEFAULT_OPERATOR_PRECEDENCE_LEVELS The operator precedence levels to use in the parser
--- @param <Number?> tokenIndex=1 The index of the current token
--- @param <String|Table ?> expression=nil The expression to show during an error (e.g unexpected operator, etc.)
--- @return <Table> ParserInstance The Parser instance.
+--- @class Creates a new Parser instance.
+--- @param tokens table The tokens to parse.
+--- @param operatorPrecedenceLevels table? The operator precedence levels to use in the parser. Default is DEFAULT_OPERATOR_PRECEDENCE_LEVELS.
+--- @param tokenIndex number? The index of the current token. Default is 1.
+--- @param expression string? The expression to show during an error (e.g unexpected operator, etc.).
+--- @return table ParserInstance The Parser instance.
 function Parser.new(tokens, operatorPrecedenceLevels, tokenIndex, expression)
   local ParserInstance = {}
   if tokens then
     ParserInstance.currentTokenIndex = tokenIndex or 1
-    ParserInstance.currentToken = tokens[tokenIndex or 1]
+    ParserInstance.currentToken      = tokens[tokenIndex or 1]
   end
   ParserInstance.operatorPrecedenceLevels = operatorPrecedenceLevels or DEFAULT_OPERATOR_PRECEDENCE_LEVELS
   ParserInstance.expression               = expression

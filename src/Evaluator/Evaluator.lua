@@ -43,8 +43,8 @@ local DEFAULT_FUNCTIONS = {
 local EvaluatorMethods = {}
 
 --- Evaluates the given unary operator node.
--- @param <Table> node The node to evaluate.
--- @return <Number> result The result of the evaluation.
+--- @param node table The node to evaluate.
+--- @return number result The result of the evaluation.
 function EvaluatorMethods:evaluateUnaryOperator(node)
   local nodeValue = node.Value
 
@@ -56,24 +56,24 @@ function EvaluatorMethods:evaluateUnaryOperator(node)
 end
 
 --- Evaluates the given binary operator node.
--- @param <Table> node The node to evaluate.
--- @return <Number> result The result of the evaluation.
+--- @param node table The node to evaluate.
+--- @return number result The result of the evaluation.
 function EvaluatorMethods:evaluateBinaryOperator(node)
   local nodeValue = node.Value
-  local nodeLeft = node.Left
+  local nodeLeft  = node.Left
   local nodeRight = node.Right
 
   local operatorFunction = self.operatorFunctions.Binary[nodeValue]
   assert(operatorFunction, "invalid operator")
 
-  local leftValue = self:evaluateNode(nodeLeft)
+  local leftValue  = self:evaluateNode(nodeLeft)
   local rightValue = self:evaluateNode(nodeRight)
   return operatorFunction(leftValue, rightValue, node)
 end
 
 --- Check what type of operator node it is and evaluates it by calling the appropriate function.
--- @param <Table> node The node to evaluate.
--- @return <Number> result The result of the evaluation.
+--- @param node table The node to evaluate.
+--- @return number result The result of the evaluation.
 function EvaluatorMethods:evaluateOperator(node)
   local isUnary = not (not node.Operand)
   if isUnary then
@@ -83,11 +83,11 @@ function EvaluatorMethods:evaluateOperator(node)
 end
 
 --- Evaluates a function call node.
--- @param <Table> node The node to evaluate.
--- @return <Number> result The result of the evaluation.
+--- @param node table The node to evaluate.
+--- @return number result The result of the evaluation.
 function EvaluatorMethods:evaluateFunctionCall(node)
   local functionName = node.FunctionName
-  local arguments = node.Arguments
+  local arguments    = node.Arguments
 
   local functionCall = self.functions[functionName] or DEFAULT_FUNCTIONS[functionName]
   assert(functionCall, "invalid function call: " .. tostring(functionName))
@@ -102,8 +102,8 @@ function EvaluatorMethods:evaluateFunctionCall(node)
 end
 
 --- Evaluates the given node.
--- @param <Table> node The node to evaluate.
--- @return <Number> result The result of the evaluation.
+--- @param node table The node to evaluate.
+--- @return number|nil result The result of the evaluation, or nil if an error occurred.
 function EvaluatorMethods:evaluateNode(node)
   local nodeType = node.TYPE
 
@@ -127,10 +127,10 @@ end
 --// PUBLIC METHODS \\--
 
 --- Resets the evaluator to its initial state.
--- @param <Table> givenExpression The expression to evaluate.
--- @param <Table?> givenVariables={} The variables to use in the evaluator.
--- @param <Table?> givenOperatorFunctions=DEFAULT_OPERATOR_FUNCTIONS The operator functions to evaluate in the evaluator.
--- @param <Table?> givenFunctions=DEFAULT_FUNCTIONS The functions to evaluate in the evaluator.
+--- @param givenExpression table The expression to evaluate.
+--- @param givenVariables table? The variables to use in the evaluator.
+--- @param givenOperatorFunctions table? The operator functions to evaluate in the evaluator.
+--- @param givenFunctions table? The functions to evaluate in the evaluator.
 function EvaluatorMethods:resetToInitialState(givenExpression, givenVariables, givenOperatorFunctions, givenFunctions)
   self.expression        = givenExpression
   self.variables         = givenVariables or {}
@@ -139,28 +139,33 @@ function EvaluatorMethods:resetToInitialState(givenExpression, givenVariables, g
 end
 
 --- Evaluates the given expression.
--- @return <Number> result The result of the evaluation.
+--- @return number|nil result The result of the evaluation.
 function EvaluatorMethods:evaluate()
   assert(self.expression, "No expression to evaluate")
 
-  return self:evaluateNode(self.expression)
+  local result = self:evaluateNode(self.expression)
+  if result == nil then
+    return error("The expression returned nil instead of a number.")
+  end
+
+  return result
 end
 
 --* Evaluator *--
 local Evaluator = {}
 
 --- Creates a new Evaluator instance.
--- @param <Table> givenExpression The expression to evaluate.
--- @param <Table?> givenVariables={} The variables to use in the evaluator.
--- @param <Table?> givenOperatorFunctions=DEFAULT_OPERATOR_FUNCTIONS The operator functions to evaluate in the evaluator.
--- @param <Table?> givenFunctions=DEFAULT_FUNCTIONS The functions to evaluate in the evaluator.
--- @return <Table> EvaluatorInstance The Evaluator instance.
+--- @param givenExpression table The expression to evaluate.
+--- @param givenVariables table? The variables to use in the evaluator.
+--- @param givenOperatorFunctions table? The operator functions to evaluate in the evaluator.
+--- @param givenFunctions table? The functions to evaluate in the evaluator.
+--- @return table EvaluatorInstance The Evaluator instance.
 function Evaluator.new(givenExpression, givenVariables, givenOperatorFunctions, givenFunctions)
   local EvaluatorInstance = {}
-  EvaluatorInstance.expression = givenExpression
-  EvaluatorInstance.variables = givenVariables or {}
+  EvaluatorInstance.expression        = givenExpression
+  EvaluatorInstance.variables         = givenVariables or {}
   EvaluatorInstance.operatorFunctions = givenOperatorFunctions or DEFAULT_OPERATOR_FUNCTIONS
-  EvaluatorInstance.functions = givenFunctions or DEFAULT_FUNCTIONS
+  EvaluatorInstance.functions         = givenFunctions or DEFAULT_FUNCTIONS
 
   insertValues(EvaluatorMethods, EvaluatorInstance)
 
