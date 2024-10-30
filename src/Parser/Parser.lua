@@ -278,7 +278,7 @@ end
 local Parser = {}
 
 --- @class Creates a new Parser instance.
---- @param tokens table The tokens to parse.
+--- @param tokens table? The tokens to parse.
 --- @param operatorPrecedenceLevels table? The operator precedence levels to use in the parser. Default is DEFAULT_OPERATOR_PRECEDENCE_LEVELS.
 --- @param tokenIndex number? The index of the current token. Default is 1.
 --- @param expression string? The expression to show during an error (e.g unexpected operator, etc.).

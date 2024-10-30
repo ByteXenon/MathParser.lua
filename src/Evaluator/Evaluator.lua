@@ -155,7 +155,7 @@ end
 local Evaluator = {}
 
 --- Creates a new Evaluator instance.
---- @param givenExpression table The expression to evaluate.
+--- @param givenExpression table? The expression to evaluate.
 --- @param givenVariables table? The variables to use in the evaluator.
 --- @param givenOperatorFunctions table? The operator functions to evaluate in the evaluator.
 --- @param givenFunctions table? The functions to evaluate in the evaluator.
