@@ -17,8 +17,8 @@ local insertValues = Helpers.insertValues
 local MathParserMethods = {}
 
 --- Tokenizes the given expression.
--- @param <String> expression The expression to tokenize.
--- @return <Table> tokens The tokens of the expression.
+--- @param expression string The expression to tokenize.
+--- @return table tokens The tokens of the expression.
 function MathParserMethods:tokenize(expression)
   if self.cachedTokens[expression] then
     return self.cachedTokens[expression]
@@ -31,8 +31,9 @@ function MathParserMethods:tokenize(expression)
 end
 
 --- Parses the given tokens.
--- @param <Table> tokens The tokens to parse.
--- @return <Table> AST The AST of the tokens.
+--- @param tokens table The tokens to parse.
+--- @param expression string The expression to parse.
+--- @return table AST The AST of the tokens.
 function MathParserMethods:parse(tokens, expression)
   if self.cachedASTs[expression] then
     return self.cachedASTs[expression]
@@ -45,8 +46,8 @@ function MathParserMethods:parse(tokens, expression)
 end
 
 --- Evaluates the given AST.
--- @param <Table> AST The AST to evaluate.
--- @return <Number> evaluatedValue The result of the evaluation.
+--- @param AST table The AST to evaluate.
+--- @return number evaluatedValue The result of the evaluation.
 function MathParserMethods:evaluate(AST)
   if self.cachedResults[AST] then
     return self.cachedResults[AST]
@@ -60,15 +61,15 @@ function MathParserMethods:evaluate(AST)
 end
 
 --- Solves the given expression.
--- @param <String> expression The expression to solve.
--- @return <Number> result The result of the expression.
+--- @param expression string The expression to solve.
+--- @return number result The result of the expression.
 function MathParserMethods:solve(expression)
   return self:evaluate(self:parse(self:tokenize(expression), expression))
 end
 
 --- Adds a variable to its value.
--- @param <String> variableName The name of the variable.
--- @param <Number> variableValue The value of the variable.
+--- @param variableName string The name of the variable.
+--- @param variableValue number The value of the variable.
 function MathParserMethods:addVariable(variableName, variableValue)
   self.variables = self.variables or {}
   self.variables[variableName] = variableValue
@@ -78,7 +79,7 @@ function MathParserMethods:addVariable(variableName, variableValue)
 end
 
 --- Adds multiple variables to their values.
--- @param <Table> variables The variables to add.
+--- @param variables table The variables to add.
 function MathParserMethods:addVariables(variables)
   for variableName, variableValue in pairs(variables) do
     self:addVariable(variableName, variableValue)
@@ -89,8 +90,8 @@ function MathParserMethods:addVariables(variables)
 end
 
 --- Adds a function to the evaluator.
--- @param <String> functionName The name of the function.
--- @param <Function> functionValue The function to add.
+--- @param functionName string The name of the function.
+--- @param functionValue function The function to add.
 function MathParserMethods:addFunction(functionName, functionValue)
   self.functions = self.functions or {}
   self.functions[functionName] = functionValue
@@ -100,7 +101,7 @@ function MathParserMethods:addFunction(functionName, functionValue)
 end
 
 --- Adds multiple functions to the evaluator.
--- @param <Table> functions The functions to add.
+--- @param functions table The functions to add.
 function MathParserMethods:addFunctions(functions)
   for functionName, functionValue in pairs(functions) do
     self:addFunction(functionName, functionValue)
@@ -111,7 +112,7 @@ function MathParserMethods:addFunctions(functions)
 end
 
 --- Sets the operator precedence levels that the parser will use.
--- @param <Table> operatorPrecedenceLevels The operator precedence levels to use in the parser.
+--- @param operatorPrecedenceLevels table The operator precedence levels to use in the parser.
 function MathParserMethods:setOperatorPrecedenceLevels(operatorPrecedenceLevels)
   self.operatorPrecedenceLevels = operatorPrecedenceLevels
 
@@ -120,7 +121,7 @@ function MathParserMethods:setOperatorPrecedenceLevels(operatorPrecedenceLevels)
 end
 
 --- Sets the variables that the evaluator will use.
--- @param <Table> variables The variables to use in the evaluator.
+--- @param variables table The variables to use in the evaluator.
 function MathParserMethods:setVariables(variables)
   self.variables = variables
 
@@ -129,7 +130,7 @@ function MathParserMethods:setVariables(variables)
 end
 
 --- Sets the operator functions that the evaluator will use.
--- @param <Table> operatorFunctions The operator functions to evaluate in the evaluator.
+--- @param operatorFunctions table The operator functions to evaluate in the evaluator.
 function MathParserMethods:setOperatorFunctions(operatorFunctions)
   self.operatorFunctions = operatorFunctions
 
@@ -138,7 +139,7 @@ function MathParserMethods:setOperatorFunctions(operatorFunctions)
 end
 
 --- Sets the operators that the lexer will use.
--- @param <Table> operators The operators that the lexer will use.
+--- @param operators table The operators that the lexer will use.
 function MathParserMethods:setOperators(operators)
   self.operators = operators
 
@@ -147,7 +148,7 @@ function MathParserMethods:setOperators(operators)
 end
 
 --- Sets the functions that the evaluator will use.
--- @param <Table> functions The functions to use in the evaluator
+--- @param functions table The functions to use in the evaluator.
 function MathParserMethods:setFunctions(functions)
   self.functions = functions
 
@@ -160,14 +161,17 @@ function MathParserMethods:resetCaches()
   self.cachedTokens  = {}
   self.cachedASTs    = {}
   self.cachedResults = {}
+
+  -- pcall() because if used in Roblox, it will throw an error
+  pcall(collectgarbage, "collect") -- Free up memory from the old caches
 end
 
 --- Resets the MathParser to its initial state.
--- @param <Table> operatorPrecedenceLevels The operator precedence levels to use in the parser.
--- @param <Table> variables The variables to use in the evaluator.
--- @param <Table> operatorFunctions The operator functions to evaluate in the evaluator.
--- @param <Table> operators The operators to use in the lexer.
--- @param <Table> functions The functions to use in the evaluator
+--- @param operatorPrecedenceLevels table? The operator precedence levels to use in the parser.
+--- @param variables table? The variables to use in the evaluator.
+--- @param operatorFunctions table? The operator functions to evaluate in the evaluator.
+--- @param operators table? The operators to use in the lexer.
+--- @param functions table? The functions to use in the evaluator.
 function MathParserMethods:resetToInitialState(operatorPrecedenceLevels, variables, operatorFunctions, operators, functions)
   self.operatorPrecedenceLevels = operatorPrecedenceLevels
   self.variables = variables
@@ -175,21 +179,19 @@ function MathParserMethods:resetToInitialState(operatorPrecedenceLevels, variabl
   self.operators = operators
   self.functions = functions
 
-  self.cachedTokens  = {}
-  self.cachedASTs    = {}
-  self.cachedResults = {}
+  self:resetCaches()
 end
 
 --* MathParser *--
 local MathParser = {}
 
---- @class Creates a new MathParser.
--- @param <Table> operatorPrecedenceLevels The operator precedence levels to use in the parser.
--- @param <Table> variables The variables to use in the evaluator.
--- @param <Table> operatorFunctions The operator functions to evaluate in the evaluator.
--- @param <Table> operators The operators to use in the lexer.
--- @param <Table> functions The functions to use in the evaluator
--- @return <Table> MathParserInstance The MathParser instance.
+--- @class MathParserInstance
+--- @param operatorPrecedenceLevels table? The operator precedence levels to use in the parser.
+--- @param variables table? The variables to use in the evaluator.
+--- @param operatorFunctions table? The operator functions to evaluate in the evaluator.
+--- @param operators table? The operators to use in the lexer.
+--- @param functions table? The functions to use in the evaluator.
+--- @return table MathParserInstance The MathParser instance.
 function MathParser:new(operatorPrecedenceLevels, variables, operatorFunctions, operators, functions)
   local MathParserInstance = {}
 
